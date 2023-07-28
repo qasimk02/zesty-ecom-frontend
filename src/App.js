@@ -2,7 +2,9 @@ import "./App.css";
 import Footer from "./user/components/Footer/Footer";
 import "./user/components/Navigation/Navigation";
 import Navigation from "./user/components/Navigation/Navigation";
+import Cart from "./user/pages/Cart";
 import HomePage from "./user/pages/HomePage";
+import ProductDetailsPage from "./user/pages/ProductDetailsPage";
 import ProductPage from "./user/pages/ProductPage";
 
 function App() {
@@ -11,7 +13,9 @@ function App() {
       <Navigation />
       <div>
         {/* <HomePage /> */}
-        <ProductPage />
+        {/* <ProductPage /> */}
+        {/* <ProductDetailsPage /> */}
+        <Cart />
       </div>
       <Footer />
     </div>

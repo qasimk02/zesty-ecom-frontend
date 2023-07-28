@@ -1,6 +1,7 @@
 import { Fragment, useState } from "react";
 import { Dialog, Disclosure, Menu, Transition } from "@headlessui/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
+import FilterAltIcon from "@mui/icons-material/FilterAlt";
 import {
   ChevronDownIcon,
   FunnelIcon,
@@ -10,6 +11,8 @@ import {
 } from "@heroicons/react/20/solid";
 import mensShirts from "../Data/HomeSectionData/MensShirt";
 import ProductCard from "../components/Card/ProductCard/ProductCard";
+import { useLocation, useNavigate } from "react-router-dom";
+import { Slider } from "@mui/material";
 
 const sortOptions = [
   { name: "Most Popular", href: "#", current: true },
@@ -32,7 +35,7 @@ const filters = [
     options: [
       { value: "white", label: "White", checked: false },
       { value: "beige", label: "Beige", checked: false },
-      { value: "blue", label: "Blue", checked: true },
+      { value: "blue", label: "Blue", checked: false },
       { value: "brown", label: "Brown", checked: false },
       { value: "green", label: "Green", checked: false },
       { value: "purple", label: "Purple", checked: false },
@@ -44,7 +47,7 @@ const filters = [
     options: [
       { value: "new-arrivals", label: "New Arrivals", checked: false },
       { value: "sale", label: "Sale", checked: false },
-      { value: "travel", label: "Travel", checked: true },
+      { value: "travel", label: "Travel", checked: false },
       { value: "organization", label: "Organization", checked: false },
       { value: "accessories", label: "Accessories", checked: false },
     ],
@@ -58,7 +61,7 @@ const filters = [
       { value: "12l", label: "12L", checked: false },
       { value: "18l", label: "18L", checked: false },
       { value: "20l", label: "20L", checked: false },
-      { value: "40l", label: "40L", checked: true },
+      { value: "40l", label: "40L", checked: false },
     ],
   },
 ];
@@ -69,7 +72,42 @@ function classNames(...classes) {
 
 export default function ProductPage() {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
 
+  //range selector
+  const [value, setValue] = useState([1, 10000]);
+
+  // Changing State when volume increases/decreases
+  const handleRangeSelector = (event, newValue) => {
+    setValue(newValue);
+    const searchParams = new URLSearchParams(location.search);
+    searchParams.set("minPrice", newValue[0]);
+    searchParams.set("maxPrice", newValue[1]);
+
+    const query = searchParams.toString();
+    navigate({ search: `?${query}` });
+  };
+
+  //hanlding filters
+  const handleFilter = (sectionId, value) => {
+    const searchParams = new URLSearchParams(location.search);
+    let filterValue = searchParams.getAll(sectionId);
+    if (filterValue.length > 0 && filterValue[0].split(",").includes(value)) {
+      filterValue = filterValue[0].split(",").filter((item) => item !== value);
+
+      if (filterValue.length === 0) {
+        searchParams.delete(sectionId);
+      }
+    } else {
+      filterValue.push(value);
+    }
+    if (filterValue.length > 0) {
+      searchParams.set(sectionId, filterValue.join(","));
+    }
+    const query = searchParams.toString();
+    navigate({ search: `?${query}` });
+  };
   return (
     <div className="bg-white">
       <div>
@@ -169,6 +207,9 @@ export default function ProductPage() {
                                     className="flex items-center"
                                   >
                                     <input
+                                      onChange={() =>
+                                        handleFilter(section.id, option.value)
+                                      }
                                       id={`filter-mobile-${section.id}-${optionIdx}`}
                                       name={`${section.id}[]`}
                                       defaultValue={option.value}
@@ -273,20 +314,24 @@ export default function ProductPage() {
             </h2>
 
             <div className="grid grid-cols-1 gap-x-8 gap-y-10 lg:grid-cols-4">
-              {/* Filters */}
               <form className="hidden lg:block">
+                <div className="flex justify-between text-center opacity-50">
+                  <h1 className="text-lg font-bold mb-6">Filters</h1>
+                  <FilterAltIcon />
+                </div>
                 <h3 className="sr-only">Categories</h3>
                 <ul
                   role="list"
                   className="space-y-4 border-b border-gray-200 pb-6 text-sm font-medium text-gray-900"
                 >
+                  {/* subCategories */}
                   {subCategories.map((category) => (
                     <li key={category.name}>
                       <a href={category.href}>{category.name}</a>
                     </li>
                   ))}
                 </ul>
-
+                {/* filters */}
                 {filters.map((section) => (
                   <Disclosure
                     as="div"
@@ -323,6 +368,9 @@ export default function ProductPage() {
                                 className="flex items-center"
                               >
                                 <input
+                                  onChange={() =>
+                                    handleFilter(section.id, option.value)
+                                  }
                                   id={`filter-${section.id}-${optionIdx}`}
                                   name={`${section.id}[]`}
                                   defaultValue={option.value}
@@ -344,13 +392,51 @@ export default function ProductPage() {
                     )}
                   </Disclosure>
                 ))}
+                {/* Price range */}
+                <Disclosure as="div" className="border-b border-gray-200 py-6">
+                  {({ open }) => (
+                    <>
+                      <h3 className="-my-3 flow-root">
+                        <Disclosure.Button className="flex w-full items-center justify-between bg-white py-3 text-sm text-gray-400 hover:text-gray-500">
+                          <span className="font-medium text-gray-900">
+                            Price Range
+                          </span>
+                          <span className="ml-6 flex items-center">
+                            {open ? (
+                              <MinusIcon
+                                className="h-5 w-5"
+                                aria-hidden="true"
+                              />
+                            ) : (
+                              <PlusIcon
+                                className="h-5 w-5"
+                                aria-hidden="true"
+                              />
+                            )}
+                          </span>
+                        </Disclosure.Button>
+                      </h3>
+                      <Disclosure.Panel className="pt-6">
+                        <div className="space-y-4">
+                          <Slider
+                            value={value}
+                            onChange={handleRangeSelector}
+                            valueLabelFormat={(value) => `Rs${value}`}
+                            valueLabelDisplay="auto"
+                            min={1}
+                            max={10000}
+                          />
+                        </div>
+                      </Disclosure.Panel>
+                    </>
+                  )}
+                </Disclosure>
               </form>
-
               {/* Product grid */}
               <div className="lg:col-span-3 md:col-span-2 w-full">
                 <div className="flex flex-wrap justify-center bg-white py-5">
-                  {mensShirts.map((item) => (
-                    <ProductCard product={item} />
+                  {mensShirts.map((item, index) => (
+                    <ProductCard key={index} product={item} />
                   ))}
                 </div>
               </div>

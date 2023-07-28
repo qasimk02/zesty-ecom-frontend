@@ -9,7 +9,7 @@ const Footer = () => {
         container
         sx={{ py: 3 }}
       >
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={6} sm={6} md={3} sx={{ pb: 3 }}>
           <Typography className="pb-5" variant="h6">
             Company
           </Typography>
@@ -40,7 +40,7 @@ const Footer = () => {
           </div>
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={6} sm={6} md={3} sx={{ pb: 3 }}>
           <Typography className="pb-5" variant="h6">
             Solutions
           </Typography>
@@ -71,7 +71,7 @@ const Footer = () => {
           </div>
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={6} sm={6} md={3} sx={{ pb: 3 }}>
           <Typography className="pb-5" variant="h6">
             Documentation
           </Typography>
@@ -87,7 +87,7 @@ const Footer = () => {
           </div>
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={6} sm={6} md={3} sx={{ pb: 3 }}>
           <Typography className="pb-5" variant="h6">
             Legal
           </Typography>
@@ -108,7 +108,7 @@ const Footer = () => {
           </div>
         </Grid>
 
-        <Grid className="pt-20" item xs={12}>
+        <Grid className="pt-15" item xs={12}>
           <Typography variant="body2" component="p" align="center">
             &copy; 2023 Zesty. All rights reserved.
           </Typography>
