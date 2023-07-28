@@ -8,6 +8,7 @@ const items = mainCarouselData.map((item) => (
     width="100%"
     className="cursor-pointer"
     src={item.image}
+    alt="presentation"
     role="presentation"
   />
 ));
