@@ -9,7 +9,9 @@ import ProductCard from "../../Card/ProductCard/ProductCard";
 const SimilarProductCarousel = ({ product }) => {
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const items = product.map((item) => <ProductCard product={item} />);
+  const items = product.map((item) => (
+    <ProductCard key={item} product={item} />
+  ));
 
   const responsive = {
     0: { items: 2 },

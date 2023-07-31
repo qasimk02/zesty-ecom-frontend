@@ -1,11 +1,10 @@
 import { useState } from "react";
-import { StarIcon } from "@heroicons/react/20/solid";
 import { RadioGroup } from "@headlessui/react";
 import { Box, Button, Grid, LinearProgress, Rating } from "@mui/material";
 import ProductReviewCard from "../components/Card/ProductReviewCard/ProductReviewCard";
-import ProductCard from "../components/Card/ProductCard/ProductCard";
 import mensShirts from "../Data/HomeSectionData/MensShirt";
 import SimilarProductCarousel from "../components/Carousel/SimilarProductCarousel/SimilarProductCarousel";
+import { useNavigate } from "react-router-dom";
 
 const product = {
   name: "Basic Tee 6-Pack",
@@ -54,7 +53,6 @@ const product = {
   details:
     'The 6-Pack includes two black, two white, and two heather gray Basic Tees. Sign up for our subscription service and be the first to get new, exciting colors, like our upcoming "Charcoal Gray" limited release.',
 };
-const reviews = { href: "#", average: 4, totalCount: 117 };
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -63,15 +61,17 @@ function classNames(...classes) {
 export default function ProductDetailsPage() {
   const [selectedColor, setSelectedColor] = useState(product.colors[0]);
   const [selectedSize, setSelectedSize] = useState(product.sizes[2]);
+  const navigate = useNavigate();
+
+  const handleAddToCart = () => {
+    navigate("/cart");
+  };
 
   return (
     <div className="bg-white p-5">
       <div className="pt-10">
         <nav aria-label="Breadcrumb">
-          <ol
-            role="list"
-            className="mx-auto flex max-w-2xl items-center space-x-2 px-4 sm:px-6 lg:max-w-7xl lg:px-8"
-          >
+          <ol className="mx-auto flex max-w-2xl items-center space-x-2 px-4 sm:px-6 lg:max-w-7xl lg:px-8">
             {product.breadcrumbs.map((breadcrumb) => (
               <li key={breadcrumb.id}>
                 <div className="flex items-center">
@@ -291,6 +291,7 @@ export default function ProductDetailsPage() {
 
                 {/* Add to cart button */}
                 <Button
+                  onClick={handleAddToCart}
                   variant="contained"
                   sx={{
                     px: "2rem",
@@ -322,7 +323,7 @@ export default function ProductDetailsPage() {
                 </h3>
 
                 <div className="mt-4">
-                  <ul role="list" className="list-disc space-y-2 pl-4 text-sm">
+                  <ul className="list-disc space-y-2 pl-4 text-sm">
                     {product.highlights.map((highlight) => (
                       <li key={highlight} className="text-gray-400">
                         <span className="text-gray-600">{highlight}</span>

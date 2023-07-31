@@ -7,7 +7,8 @@ import {
   ShoppingBagIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import { Avatar, Box, Button } from "@mui/material";
+import { Avatar, Box, Button, Menu, MenuItem } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 const navigation = {
   categories: [
@@ -146,7 +147,28 @@ function classNames(...classes) {
 export default function Navigation() {
   const [open, setOpen] = useState(false);
 
-  const handleCategoryClick = () => {};
+  //profile popup
+  const [anchorEl, setAnchorEl] = useState(null);
+  const isopen = Boolean(anchorEl);
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const navigate = useNavigate();
+
+  const handleCategoryClick = (category, section, item, close) => {
+    navigate(`/${category.id}/${section.id}/${item.name}`);
+  };
+  const handleCart = () => {
+    navigate("/cart");
+  };
+  const handleMyOrders = () => {
+    navigate("account/order");
+    handleClose();
+  };
 
   return (
     <div className="bg-white">
@@ -252,18 +274,25 @@ export default function Navigation() {
                               {section.name}
                             </p>
                             <ul
-                              role="list"
                               aria-labelledby={`${category.id}-${section.id}-heading-mobile`}
                               className="mt-6 flex flex-col space-y-6"
                             >
                               {section.items.map((item) => (
                                 <li key={item.name} className="flex">
-                                  <a
-                                    href={item.href}
-                                    className="-m-2 block p-2 text-gray-500"
+                                  {/* handling click(route change) */}
+                                  <p
+                                    onClick={() =>
+                                      handleCategoryClick(
+                                        category,
+                                        section,
+                                        item
+                                        // close
+                                      )
+                                    }
+                                    className="cursor-pointer hover:text-gray-800"
                                   >
                                     {item.name}
-                                  </a>
+                                  </p>
                                 </li>
                               ))}
                             </ul>
@@ -346,14 +375,14 @@ export default function Navigation() {
 
               {/* Logo */}
               <div className="ml-4 flex lg:ml-0">
-                <a href="#">
+                <div onClick={() => navigate("/")} className="cursor-pointer">
                   <span className="color-red bgcol">Z</span>
                   {/* <img
                     className="h-8 w-auto"
                     src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600"
                     alt=""
                   /> */}
-                </a>
+                </div>
               </div>
 
               {/* Flyout menus */}
@@ -437,7 +466,6 @@ export default function Navigation() {
                                             {section.name}
                                           </p>
                                           <ul
-                                            role="list"
                                             aria-labelledby={`${section.name}-heading`}
                                             className="mt-6 space-y-6 sm:mt-4 sm:space-y-4"
                                           >
@@ -446,12 +474,20 @@ export default function Navigation() {
                                                 key={item.name}
                                                 className="flex"
                                               >
-                                                <a
-                                                  href={item.href}
-                                                  className="hover:text-gray-800"
+                                                {/* handling click(route change) */}
+                                                <p
+                                                  onClick={() =>
+                                                    handleCategoryClick(
+                                                      category,
+                                                      section,
+                                                      item
+                                                      // close
+                                                    )
+                                                  }
+                                                  className="cursor-pointer hover:text-gray-800"
                                                 >
                                                   {item.name}
-                                                </a>
+                                                </p>
                                               </li>
                                             ))}
                                           </ul>
@@ -498,44 +534,37 @@ export default function Navigation() {
                 </div>
 
                 <div className="hidden lg:ml-8 lg:flex">
-                  <a href="#" className="">
-                    <Popover className="relative">
-                      <Popover.Button>
-                        <Box>
-                          <Avatar
-                            sx={{
-                              width: "56",
-                              height: "56",
-                            }}
-                          >
-                            <img src={profile} alt="profile" />
-                          </Avatar>
-                        </Box>
-                      </Popover.Button>
-
-                      <Popover.Panel className="absolute z-10">
-                        <div className="flex flex-col bg-white shadow-md rounded-md px-4 pt-1 pb-3">
-                          <a href="/analytics">
-                            <span className="opacity-75 hover:opacity-90">
-                              Profile
-                            </span>
-                          </a>
-                          <a href="/engagement">
-                            {" "}
-                            <span className="opacity-75 hover:opacity-90">
-                              Orders
-                            </span>
-                          </a>
-                          <a href="/security">
-                            {" "}
-                            <span className="opacity-75 hover:opacity-90">
-                              Logout
-                            </span>
-                          </a>
-                        </div>
-                      </Popover.Panel>
-                    </Popover>
-                  </a>
+                  <Button
+                    id="basic-button"
+                    aria-controls={open ? "basic-menu" : undefined}
+                    aria-haspopup="true"
+                    aria-expanded={open ? "true" : undefined}
+                    onClick={handleClick}
+                  >
+                    <Box>
+                      <Avatar
+                        sx={{
+                          width: "56",
+                          height: "56",
+                        }}
+                      >
+                        <img src={profile} alt="profile" />
+                      </Avatar>
+                    </Box>
+                  </Button>
+                  <Menu
+                    id="basic-menu"
+                    anchorEl={anchorEl}
+                    open={isopen}
+                    onClose={handleClose}
+                    MenuListProps={{
+                      "aria-labelledby": "basic-button",
+                    }}
+                  >
+                    <MenuItem onClick={handleClose}>Profile</MenuItem>
+                    <MenuItem onClick={handleMyOrders}>My Orders</MenuItem>
+                    <MenuItem onClick={handleClose}>Logout</MenuItem>
+                  </Menu>
                 </div>
 
                 {/* Search */}
@@ -551,7 +580,10 @@ export default function Navigation() {
 
                 {/* Cart */}
                 <div className="ml-4 flow-root lg:ml-6">
-                  <a href="#" className="group -m-2 flex items-center p-2">
+                  <a
+                    onClick={handleCart}
+                    className="group -m-2 flex items-center p-2 cursor-pointer"
+                  >
                     <ShoppingBagIcon
                       className="h-6 w-6 flex-shrink-0 text-gray-400 group-hover:text-gray-500"
                       aria-hidden="true"
@@ -559,7 +591,6 @@ export default function Navigation() {
                     <span className="ml-2 text-sm font-medium text-gray-700 group-hover:text-gray-800">
                       0
                     </span>
-                    <span className="sr-only">items in cart, view bag</span>
                   </a>
                 </div>
               </div>
