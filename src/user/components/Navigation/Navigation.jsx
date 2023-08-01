@@ -9,6 +9,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { Avatar, Box, Button, Menu, MenuItem } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import AuthModal from "../auth/authModal";
 
 const navigation = {
   categories: [
@@ -146,10 +147,12 @@ function classNames(...classes) {
 
 export default function Navigation() {
   const [open, setOpen] = useState(false);
-
   //profile popup
   const [anchorEl, setAnchorEl] = useState(null);
   const isopen = Boolean(anchorEl);
+  //auth modal
+  const [openAuthModal, setOpenAuthModal] = useState(true);
+
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -157,8 +160,11 @@ export default function Navigation() {
     setAnchorEl(null);
   };
 
-  const navigate = useNavigate();
+  const handleOpenAuthModal = () => setOpenAuthModal(true);
+  const handleCloseAuthModal = () => setOpenAuthModal(false);
 
+  //navigation
+  const navigate = useNavigate();
   const handleCategoryClick = (category, section, item, close) => {
     navigate(`/${category.id}/${section.id}/${item.name}`);
   };
@@ -318,20 +324,12 @@ export default function Navigation() {
 
                 <div className="space-y-6 border-t border-gray-200 px-4 py-6">
                   <div className="flow-root">
-                    <a
-                      href="#"
-                      className="-m-2 block p-2 font-medium text-gray-900"
+                    <div
+                      onClick={handleOpenAuthModal}
+                      className="text-sm font-medium text-gray-700 hover:text-gray-800 cursor-pointer"
                     >
                       Sign in
-                    </a>
-                  </div>
-                  <div className="flow-root">
-                    <a
-                      href="#"
-                      className="-m-2 block p-2 font-medium text-gray-900"
-                    >
-                      Create account
-                    </a>
+                    </div>
                   </div>
                 </div>
 
@@ -518,19 +516,13 @@ export default function Navigation() {
 
               <div className="ml-auto flex items-center">
                 <div className="hidden lg:flex lg:flex-1 lg:items-center lg:justify-end lg:space-x-6">
-                  <a
-                    href="#"
-                    className="text-sm font-medium text-gray-700 hover:text-gray-800"
+                  <div
+                    onClick={handleOpenAuthModal}
+                    className="text-sm font-medium text-gray-700 hover:text-gray-800 cursor-pointer"
                   >
                     Sign in
-                  </a>
+                  </div>
                   <span className="h-6 w-px bg-gray-200" aria-hidden="true" />
-                  <a
-                    href="#"
-                    className="text-sm font-medium text-gray-700 hover:text-gray-800"
-                  >
-                    Create account
-                  </a>
                 </div>
 
                 <div className="hidden lg:ml-8 lg:flex">
@@ -598,6 +590,7 @@ export default function Navigation() {
           </div>
         </nav>
       </header>
+      <AuthModal open={openAuthModal} handleClose={handleCloseAuthModal} />
     </div>
   );
 }
