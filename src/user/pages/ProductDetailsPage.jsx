@@ -1,12 +1,15 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { RadioGroup } from "@headlessui/react";
 import { Box, Button, Grid, LinearProgress, Rating } from "@mui/material";
 import ProductReviewCard from "../components/Card/ProductReviewCard/ProductReviewCard";
 import mensShirts from "../Data/HomeSectionData/MensShirt";
 import SimilarProductCarousel from "../components/Carousel/SimilarProductCarousel/SimilarProductCarousel";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { findProductById } from "../state/Product/action";
+import { useDispatch, useSelector } from "react-redux";
+import { addItemToCart } from "../state/Cart/action";
 
-const product = {
+const dummyProduct = {
   name: "Basic Tee 6-Pack",
   price: "$192",
   href: "#",
@@ -59,28 +62,35 @@ function classNames(...classes) {
 }
 
 export default function ProductDetailsPage() {
-  const [selectedColor, setSelectedColor] = useState(product.colors[0]);
-  const [selectedSize, setSelectedSize] = useState(product.sizes[2]);
+  const [selectedSize, setSelectedSize] = useState("");
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const params = useParams();
+  const { product } = useSelector((store) => store);
 
   const handleAddToCart = () => {
+    const data = { productId: params.productId, size: selectedSize };
+    dispatch(addItemToCart(data));
     navigate("/cart");
   };
+
+  useEffect(() => {
+    const data = { productId: params.productId };
+    dispatch(findProductById(data));
+  }, [params.productId]);
 
   return (
     <div className="bg-white p-5">
       <div className="pt-10">
         <nav aria-label="Breadcrumb">
           <ol className="mx-auto flex max-w-2xl items-center space-x-2 px-4 sm:px-6 lg:max-w-7xl lg:px-8">
-            {product.breadcrumbs.map((breadcrumb) => (
-              <li key={breadcrumb.id}>
+            {/* categories */}
+            {product.product?.categories?.map((category) => (
+              <li key={category.categoryId}>
                 <div className="flex items-center">
-                  <a
-                    href={breadcrumb.href}
-                    className="mr-2 text-sm font-medium text-gray-900"
-                  >
-                    {breadcrumb.name}
-                  </a>
+                  <p className="mr-2 text-sm font-medium text-gray-900">
+                    {category.title.toUpperCase()}
+                  </p>
                   <svg
                     width={16}
                     height={20}
@@ -94,15 +104,6 @@ export default function ProductDetailsPage() {
                 </div>
               </li>
             ))}
-            <li className="text-sm">
-              <a
-                href={product.href}
-                aria-current="page"
-                className="font-medium text-gray-500 hover:text-gray-600"
-              >
-                {product.name}
-              </a>
-            </li>
           </ol>
         </nav>
 
@@ -111,17 +112,20 @@ export default function ProductDetailsPage() {
           <div className="flex flex-col items-center">
             <div className="overflow-hidden rounded-lg max-w-[30rem] max-h-[35rem]">
               <img
-                src={product.images[0].src}
-                alt={product.images[0].alt}
+                src={product.product?.imageName}
+                alt={product.product?.name}
                 className="h-full w-full object-cover object-center"
               />
             </div>
             <div className="flex flex-wrap space-x-5 justify-center mt-3">
-              {product.images.map((image) => (
-                <div className="aspect-h-2 aspect-w-3 overflow-hidden rounded-lg max-w-[5rem] max-h-[5rem] cursor-pointer">
+              {dummyProduct.images.map((image, index) => (
+                <div
+                  key={index}
+                  className="aspect-h-2 aspect-w-3 overflow-hidden rounded-lg max-w-[5rem] max-h-[5rem] cursor-pointer"
+                >
                   <img
-                    src={image.src}
-                    alt={image.alt}
+                    src={product.product?.imageName}
+                    alt={product.product?.name}
                     className="h-full w-full object-cover object-center"
                   />
                 </div>
@@ -133,10 +137,10 @@ export default function ProductDetailsPage() {
           <div className="lg:col-span-1 max-w-2xl px-4 pb-16 sm:px-6 lg:max-w-7xl lg:px-8 lg:pb-24">
             <div className="lg:col-span-2">
               <h1 className="text-lg lg:text-xl font-semibold text-gray-900">
-                {product.name}
+                {product.product?.name}
               </h1>
               <h1 className="text-lg lg:text-xl text-gray-900 opacity-60 pt-1">
-                Caual Puff Sleeves Solid Men White Shirt
+                {product.product?.brand}
               </h1>
             </div>
 
@@ -145,9 +149,19 @@ export default function ProductDetailsPage() {
               <h2 className="sr-only">Product information</h2>
               {/* Price */}
               <div className="flex space-x-5 items-center text-lg lg:text-xl text-gray-900 mt-6">
-                <p className="font-semibold">$199</p>
-                <p className="opacity-50 line-through">$211</p>
-                <p className="text-green-600 font-semibold">5% Off</p>
+                <p className="font-semibold">
+                  $
+                  {product.product?.price -
+                    product.product?.price *
+                      product.product?.discountPercent *
+                      0.01}
+                </p>
+                <p className="opacity-50 line-through">
+                  ${product.product?.price}
+                </p>
+                <p className="text-green-600 font-semibold">
+                  {product.product?.discountPercent}% Off
+                </p>
               </div>
 
               {/* Reviews */}
@@ -168,7 +182,8 @@ export default function ProductDetailsPage() {
 
               <form className="mt-10">
                 {/* Colors */}
-                <div>
+
+                {/* <div>
                   <h3 className="text-sm font-medium text-gray-900">Color</h3>
                   <RadioGroup
                     value={selectedColor}
@@ -179,7 +194,7 @@ export default function ProductDetailsPage() {
                       Choose a color
                     </RadioGroup.Label>
                     <div className="flex items-center space-x-3">
-                      {product.colors.map((color) => (
+                      {dummyProduct.colors.map((color) => (
                         <RadioGroup.Option
                           key={color.name}
                           value={color}
@@ -206,7 +221,7 @@ export default function ProductDetailsPage() {
                       ))}
                     </div>
                   </RadioGroup>
-                </div>
+                </div> */}
 
                 {/* Sizes */}
                 <div className="mt-10">
@@ -229,14 +244,14 @@ export default function ProductDetailsPage() {
                       Choose a size
                     </RadioGroup.Label>
                     <div className="grid grid-cols-4 gap-4 sm:grid-cols-8 lg:grid-cols-4">
-                      {product.sizes.map((size) => (
+                      {product.product?.sizes.map((size) => (
                         <RadioGroup.Option
-                          key={size.name}
-                          value={size}
-                          disabled={!size.inStock}
+                          key={size.name.toUpperCase()}
+                          value={size.name}
+                          disabled={size.quantity <= 0}
                           className={({ active }) =>
                             classNames(
-                              size.inStock
+                              size.quantity > 0
                                 ? "cursor-pointer bg-white text-gray-900 shadow-sm"
                                 : "cursor-not-allowed bg-gray-50 text-gray-200",
                               active ? "ring-2 ring-indigo-500" : "",
@@ -247,9 +262,9 @@ export default function ProductDetailsPage() {
                           {({ active, checked }) => (
                             <>
                               <RadioGroup.Label as="span">
-                                {size.name}
+                                {size.name.toUpperCase()}
                               </RadioGroup.Label>
-                              {size.inStock ? (
+                              {size.quantity > 0 ? (
                                 <span
                                   className={classNames(
                                     active ? "border" : "border-2",
@@ -312,7 +327,7 @@ export default function ProductDetailsPage() {
 
                 <div className="space-y-6">
                   <p className="text-base text-gray-900">
-                    {product.description}
+                    {product.product?.description}
                   </p>
                 </div>
               </div>
@@ -324,7 +339,7 @@ export default function ProductDetailsPage() {
 
                 <div className="mt-4">
                   <ul className="list-disc space-y-2 pl-4 text-sm">
-                    {product.highlights.map((highlight) => (
+                    {dummyProduct.highlights.map((highlight) => (
                       <li key={highlight} className="text-gray-400">
                         <span className="text-gray-600">{highlight}</span>
                       </li>
@@ -337,21 +352,28 @@ export default function ProductDetailsPage() {
                 <h2 className="text-sm font-medium text-gray-900">Details</h2>
 
                 <div className="mt-4 space-y-6">
-                  <p className="text-sm text-gray-600">{product.details}</p>
+                  <p className="text-sm text-gray-600">
+                    {dummyProduct.details}
+                  </p>
                 </div>
               </div>
             </div>
           </div>
         </section>
 
+        {/* similar products */}
+        <section className="py-5">
+          <SimilarProductCarousel product={mensShirts} />
+        </section>
+
         {/* rating and reviews */}
         <section className="">
-          <h1 className="font-semibold text-lg pb-4">
+          <h1 className="font-semibold text-2xl pb-4">
             Recent Reviews & Rating
           </h1>
           <div className="border p-8">
             <Grid container>
-              <Grid item xs={12} lg={5} md={5} sx={{ pb: 8 }}>
+              <Grid item xs={12} lg={5} md={5}>
                 <h1 className="text-xl font-semibold pb-1">Product Ratings</h1>
                 <div className="flex items-center space-x-3">
                   <Rating value={4.5} precision={0.5} readOnly />
@@ -370,7 +392,7 @@ export default function ProductDetailsPage() {
                         color="success"
                       />
                     </Grid>
-                    <Grid item sx={3}>
+                    <Grid item>
                       <p className="opacity-60">45%</p>
                     </Grid>
                   </Grid>
@@ -386,7 +408,7 @@ export default function ProductDetailsPage() {
                         color="secondary"
                       />
                     </Grid>
-                    <Grid item sx={3}>
+                    <Grid item>
                       <p className="opacity-60">25%</p>
                     </Grid>
                   </Grid>
@@ -406,7 +428,7 @@ export default function ProductDetailsPage() {
                         color="primary"
                       />
                     </Grid>
-                    <Grid item sx={3}>
+                    <Grid item>
                       <p className="opacity-60">15%</p>
                     </Grid>
                   </Grid>
@@ -422,7 +444,7 @@ export default function ProductDetailsPage() {
                         color="warning"
                       />
                     </Grid>
-                    <Grid item sx={3}>
+                    <Grid item>
                       <p className="opacity-60">10%</p>
                     </Grid>
                   </Grid>
@@ -438,7 +460,7 @@ export default function ProductDetailsPage() {
                         color="error"
                       />
                     </Grid>
-                    <Grid item sx={3}>
+                    <Grid item>
                       <p className="opacity-60">5%</p>
                     </Grid>
                   </Grid>
@@ -462,18 +484,13 @@ export default function ProductDetailsPage() {
               </Grid>
               <Grid item xs={12} lg={7} md={7}>
                 <div className="space-y-6">
-                  {[1, 1, 1, 1, 1].map((review) => (
-                    <ProductReviewCard />
+                  {[1, 1, 1, 1, 1].map((review, index) => (
+                    <ProductReviewCard key={index} />
                   ))}
                 </div>
               </Grid>
             </Grid>
           </div>
-        </section>
-
-        {/* similar products */}
-        <section className="py-5">
-          <SimilarProductCarousel product={mensShirts} />
         </section>
       </div>
     </div>

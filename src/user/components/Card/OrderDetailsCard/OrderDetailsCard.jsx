@@ -3,7 +3,7 @@ import { Box, Grid } from "@mui/material";
 import { deepPurple } from "@mui/material/colors";
 import React from "react";
 
-const OrderDetailsCard = () => {
+const OrderDetailsCard = ({ item }) => {
   return (
     <div>
       <Grid
@@ -15,16 +15,34 @@ const OrderDetailsCard = () => {
           <div className="flex items-center space-x-4">
             <img
               className="w-[5rem] h-[5rem] object-cover object-top"
-              src="https://tse3.mm.bing.net/th?id=OIP.FgEuC3-oXlwR7QiNiHUImgHaJo&pid=Api&P=0&h=180"
+              src={
+                item?.product?.imageName
+                  ? item?.product?.imageName
+                  : "https://tse3.mm.bing.net/th?id=OIP.FgEuC3-oXlwR7QiNiHUImgHaJo&pid=Api&P=0&h=180"
+              }
               alt="Men's Shirts"
             />
             <div className="space-y-2 ml-5">
-              <p className="">Men Slim Mid Rise Balck Shirt</p>
-              <p className="space-x-5 opacity-50 text-xs font-semibold">
-                <span>Color: Black</span> <span>Size: M</span>
+              <p className="">
+                {item?.product?.title
+                  ? item?.product?.title
+                  : "Men Slim Mid Rise Balck Shirt"}
               </p>
-              <p className="opacity-50 text-sm font-semibold">Seller: Zesty</p>
-              <p className="opacity-50 text-sm font-semibold">$1099</p>
+              <p className="space-x-5 opacity-50 text-xs font-semibold">
+                <span>
+                  Color: {item?.product?.color ? item?.product?.color : "Black"}
+                </span>{" "}
+                <span>Size: {item?.size ? item?.size.toUpperCase() : "M"}</span>
+              </p>
+              <p className="opacity-50 text-sm font-semibold">
+                Seller: {item?.product?.brand ? item?.product?.brand : "Zesty"}
+              </p>
+              <p className="opacity-50 text-sm font-semibold">
+                $
+                {item?.totalDiscountedPrice
+                  ? item?.totalDiscountedPrice
+                  : "4533"}
+              </p>
             </div>
           </div>
         </Grid>

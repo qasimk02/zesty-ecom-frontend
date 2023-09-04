@@ -1,4 +1,4 @@
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Dialog, Popover, Tab, Transition } from "@headlessui/react";
 import profile from "../Card/ProductReviewCard/qasim.png";
 import {
@@ -8,8 +8,12 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { Avatar, Box, Button, Menu, MenuItem } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import AuthModal from "../auth/authModal";
+import { useDispatch, useSelector } from "react-redux";
+import { store } from "../../state/store";
+import { getUser, logout } from "../../state/Auth/action";
+import checkTokenExpiry from "../../utilities/jwtUtils";
 
 const navigation = {
   categories: [
@@ -101,7 +105,7 @@ const navigation = {
           id: "clothing",
           name: "Clothing",
           items: [
-            { name: "Tops", href: "#" },
+            { name: "Shirts", href: "#" },
             { name: "Pants", href: "#" },
             { name: "Sweaters", href: "#" },
             { name: "T-Shirts", href: "#" },
@@ -147,34 +151,76 @@ function classNames(...classes) {
 
 export default function Navigation() {
   const [open, setOpen] = useState(false);
-  //profile popup
-  const [anchorEl, setAnchorEl] = useState(null);
-  const isopen = Boolean(anchorEl);
+  //usermenu popup
+  const [userMenu, setUserMenu] = useState(null);
+  const isopen = Boolean(userMenu);
   //auth modal
-  const [openAuthModal, setOpenAuthModal] = useState(true);
+  const [openAuthModal, setOpenAuthModal] = useState(false);
 
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
+  //getting jwt
+  const jwtToken = localStorage.getItem("jwtToken");
+  const { auth } = useSelector((store) => store);
 
-  const handleOpenAuthModal = () => setOpenAuthModal(true);
-  const handleCloseAuthModal = () => setOpenAuthModal(false);
+  const dispatch = useDispatch();
 
   //navigation
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleClickUserMenu = (event) => {
+    setUserMenu(event.currentTarget);
+  };
+  const handleCloseUserMenu = () => {
+    setUserMenu(null);
+  };
+
+  const handleOpenAuthModal = () => {
+    setOpenAuthModal(true);
+  };
+  const handleCloseAuthModal = () => {
+    setOpenAuthModal(false);
+  };
+
   const handleCategoryClick = (category, section, item, close) => {
     navigate(`/${category.id}/${section.id}/${item.name}`);
+    setOpen(false);
   };
+
   const handleCart = () => {
     navigate("/cart");
   };
+
   const handleMyOrders = () => {
-    navigate("account/order");
-    handleClose();
+    navigate("/account/order");
+    handleCloseUserMenu();
   };
+
+  //logout
+  const handleLogout = () => {
+    dispatch(logout());
+    handleCloseUserMenu();
+  };
+
+  //use effects(if there is jwt token in localstorage then will fetch the data)
+  useEffect(() => {
+    const isTokenExpired = checkTokenExpiry(jwtToken);
+    if (!isTokenExpired) {
+      dispatch(getUser(jwtToken));
+    } else {
+      // Handle token expiration, e.g., show login auth modal
+      handleOpenAuthModal();
+    }
+  }, [jwtToken, auth.jwtToken]);
+
+  //if there is user in auth then will close the auth modal
+  useEffect(() => {
+    if (auth.user) {
+      handleCloseAuthModal();
+      if (location.pathname === "/login" || location.pathname === "/register") {
+        navigate(-1);
+      }
+    }
+  }, [auth.user]);
 
   return (
     <div className="bg-white">
@@ -292,7 +338,6 @@ export default function Navigation() {
                                         category,
                                         section,
                                         item
-                                        // close
                                       )
                                     }
                                     className="cursor-pointer hover:text-gray-800"
@@ -516,47 +561,49 @@ export default function Navigation() {
 
               <div className="ml-auto flex items-center">
                 <div className="hidden lg:flex lg:flex-1 lg:items-center lg:justify-end lg:space-x-6">
-                  <div
-                    onClick={handleOpenAuthModal}
-                    className="text-sm font-medium text-gray-700 hover:text-gray-800 cursor-pointer"
-                  >
-                    Sign in
-                  </div>
-                  <span className="h-6 w-px bg-gray-200" aria-hidden="true" />
-                </div>
-
-                <div className="hidden lg:ml-8 lg:flex">
-                  <Button
-                    id="basic-button"
-                    aria-controls={open ? "basic-menu" : undefined}
-                    aria-haspopup="true"
-                    aria-expanded={open ? "true" : undefined}
-                    onClick={handleClick}
-                  >
-                    <Box>
-                      <Avatar
-                        sx={{
-                          width: "56",
-                          height: "56",
+                  {auth.user?.firstName ? (
+                    <div className="hidden lg:ml-8 lg:flex">
+                      <Box>
+                        <Avatar
+                          onClick={handleClickUserMenu}
+                          sx={{
+                            width: "56",
+                            height: "56",
+                            cursor: "pointer",
+                            backgroundColor: "#9155FD",
+                          }}
+                        >
+                          {auth.user?.imageUrl ? (
+                            <img src={profile} alt="profile" />
+                          ) : (
+                            <p>{auth.user?.firstName[0].toUpperCase()}</p>
+                          )}
+                        </Avatar>
+                      </Box>
+                      <Menu
+                        id="basic-menu"
+                        anchorEl={userMenu}
+                        open={isopen}
+                        onClose={handleCloseUserMenu}
+                        MenuListProps={{
+                          "aria-labelledby": "basic-button",
                         }}
                       >
-                        <img src={profile} alt="profile" />
-                      </Avatar>
-                    </Box>
-                  </Button>
-                  <Menu
-                    id="basic-menu"
-                    anchorEl={anchorEl}
-                    open={isopen}
-                    onClose={handleClose}
-                    MenuListProps={{
-                      "aria-labelledby": "basic-button",
-                    }}
-                  >
-                    <MenuItem onClick={handleClose}>Profile</MenuItem>
-                    <MenuItem onClick={handleMyOrders}>My Orders</MenuItem>
-                    <MenuItem onClick={handleClose}>Logout</MenuItem>
-                  </Menu>
+                        <MenuItem onClick={handleCloseUserMenu}>
+                          Profile
+                        </MenuItem>
+                        <MenuItem onClick={handleMyOrders}>My Orders</MenuItem>
+                        <MenuItem onClick={handleLogout}>Logout</MenuItem>
+                      </Menu>
+                    </div>
+                  ) : (
+                    <div
+                      onClick={handleOpenAuthModal}
+                      className="text-sm font-medium text-gray-700 hover:text-gray-800 cursor-pointer"
+                    >
+                      Sign in
+                    </div>
+                  )}
                 </div>
 
                 {/* Search */}
