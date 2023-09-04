@@ -1,4 +1,4 @@
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Dialog, Disclosure, Menu, Transition } from "@headlessui/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import FilterAltIcon from "@mui/icons-material/FilterAlt";
@@ -9,17 +9,36 @@ import {
   PlusIcon,
   Squares2X2Icon,
 } from "@heroicons/react/20/solid";
-import mensShirts from "../Data/HomeSectionData/MensShirt";
 import ProductCard from "../components/Card/ProductCard/ProductCard";
-import { useLocation, useNavigate } from "react-router-dom";
-import { Slider } from "@mui/material";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { Pagination, Slider } from "@mui/material";
+import { useDispatch, useSelector } from "react-redux";
+import { findProducts, findProductsByCategory } from "../state/Product/action";
 
 const sortOptions = [
-  { name: "Most Popular", href: "#", current: true },
-  { name: "Best Rating", href: "#", current: false },
-  { name: "Newest", href: "#", current: false },
-  { name: "Price: Low to High", href: "#", current: false },
-  { name: "Price: High to Low", href: "#", current: false },
+  // { name: "Most Popular", href: "#", current: true },
+  // { name: "Best Rating", href: "#", current: false },
+  {
+    name: "Newest",
+    sortBy: "productId",
+    sortOrder: "descending",
+    href: "#",
+    current: false,
+  },
+  {
+    name: "Price: Low to High",
+    sortBy: "price",
+    sortOrder: "ascending",
+    href: "#",
+    current: false,
+  },
+  {
+    name: "Price: High to Low",
+    sortBy: "price",
+    sortOrder: "descending",
+    href: "#",
+    current: false,
+  },
 ];
 const subCategories = [
   { name: "Totes", href: "#" },
@@ -34,7 +53,7 @@ const filters = [
     name: "Color",
     options: [
       { value: "white", label: "White", checked: false },
-      { value: "beige", label: "Beige", checked: false },
+      { value: "black", label: "Black", checked: false },
       { value: "blue", label: "Blue", checked: false },
       { value: "brown", label: "Brown", checked: false },
       { value: "green", label: "Green", checked: false },
@@ -42,26 +61,14 @@ const filters = [
     ],
   },
   {
-    id: "category",
-    name: "Category",
-    options: [
-      { value: "new-arrivals", label: "New Arrivals", checked: false },
-      { value: "sale", label: "Sale", checked: false },
-      { value: "travel", label: "Travel", checked: false },
-      { value: "organization", label: "Organization", checked: false },
-      { value: "accessories", label: "Accessories", checked: false },
-    ],
-  },
-  {
     id: "size",
     name: "Size",
     options: [
-      { value: "2l", label: "2L", checked: false },
-      { value: "6l", label: "6L", checked: false },
-      { value: "12l", label: "12L", checked: false },
-      { value: "18l", label: "18L", checked: false },
-      { value: "20l", label: "20L", checked: false },
-      { value: "40l", label: "40L", checked: false },
+      { value: "s", label: "S", checked: false },
+      { value: "m", label: "M", checked: false },
+      { value: "l", label: "L", checked: false },
+      { value: "xl", label: "XL", checked: false },
+      { value: "xxl", label: "XXL", checked: false },
     ],
   },
 ];
@@ -70,14 +77,80 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
+//to keep the checked box sync with url
+function setCheckedStateFromUrl(optionArray, index) {
+  filters[index].options.map((option) => {
+    if (optionArray.includes(option.value)) {
+      option.checked = true;
+    }
+  });
+}
+
 export default function ProductPage() {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const param = useParams();
+  const dispatch = useDispatch();
+  const { product } = useSelector((store) => store);
 
   //range selector
-  const [value, setValue] = useState([1, 10000]);
+  const [value, setValue] = useState([1, 100000]);
 
+  const decodedQueryString = decodeURIComponent(location.search);
+  const searchParams = new URLSearchParams(decodedQueryString);
+  const colorValue = searchParams.get("color");
+  const sizeValue = searchParams.get("size");
+  const minPrice = searchParams.get("minPrice");
+  const maxPrice = searchParams.get("maxPrice");
+  const discount = searchParams.get("discount");
+  const sortValue = searchParams.get("sortBy");
+  const sortOrder = searchParams.get("sortOrder");
+  const pageNumber = searchParams.get("page") || 1;
+  const pageSize = 8;
+  const category = param.levelThree;
+
+  useEffect(() => {
+    //set the selected colors,sizes and price range in query
+    const colorArray = colorValue
+      ? decodeURIComponent(colorValue).split(",")
+      : [];
+    const sizeArray = sizeValue ? decodeURIComponent(sizeValue).split(",") : [];
+    setCheckedStateFromUrl(colorArray, 0);
+    setCheckedStateFromUrl(sizeArray, 1);
+    if (minPrice != null && maxPrice != null) {
+      setValue([minPrice, maxPrice]);
+    }
+
+    const data = {
+      colors: colorValue || [],
+      sizes: sizeValue || [],
+      minPrice: minPrice || 0,
+      maxPrice: maxPrice || 2147483647,
+      minDiscount: discount || 0,
+      sortBy: sortValue || "productId",
+      sortOrder: sortOrder || "ascending",
+      pageNumber: pageNumber - 1 || 0,
+      pageSize: pageSize,
+      category: category,
+    };
+    if (category) {
+      dispatch(findProductsByCategory(data));
+    } else {
+      dispatch(findProducts(data));
+    }
+  }, [
+    colorValue,
+    sizeValue,
+    minPrice,
+    maxPrice,
+    discount,
+    sortValue,
+    sortOrder,
+    pageNumber,
+    pageSize,
+    category,
+  ]);
   // Changing State when volume increases/decreases
   const handleRangeSelector = (event, newValue) => {
     setValue(newValue);
@@ -108,6 +181,27 @@ export default function ProductPage() {
     const query = searchParams.toString();
     navigate({ search: `?${query}` });
   };
+
+  //hanlding sort
+  const handleSort = (option, sortValue, sortOrder) => {
+    sortOptions.map((option) => (option.current = false));
+    option.current = true;
+    const searchParams = new URLSearchParams(location.search);
+    searchParams.set("sortBy", sortValue);
+    searchParams.set("sortOrder", sortOrder);
+
+    const query = searchParams.toString();
+    navigate({ search: `?${query}` });
+  };
+
+  //handling pagination
+  const handlePagination = (event, value) => {
+    const searchParams = new URLSearchParams(location.search);
+    searchParams.set("page", value);
+    const query = searchParams.toString();
+    navigate({ search: `${query}` });
+  };
+
   return (
     <div className="bg-white">
       <div>
@@ -228,6 +322,49 @@ export default function ProductPage() {
                         )}
                       </Disclosure>
                     ))}
+
+                    {/* Price range */}
+                    <Disclosure
+                      as="div"
+                      className="border-t border-gray-200 px-4 py-6"
+                    >
+                      {({ open }) => (
+                        <>
+                          <h3 className="-my-3 flow-root">
+                            <Disclosure.Button className="flex w-full items-center justify-between bg-white py-3 text-sm text-gray-400 hover:text-gray-500">
+                              <span className="font-medium text-gray-900">
+                                Price Range
+                              </span>
+                              <span className="ml-6 flex items-center">
+                                {open ? (
+                                  <MinusIcon
+                                    className="h-5 w-5"
+                                    aria-hidden="true"
+                                  />
+                                ) : (
+                                  <PlusIcon
+                                    className="h-5 w-5"
+                                    aria-hidden="true"
+                                  />
+                                )}
+                              </span>
+                            </Disclosure.Button>
+                          </h3>
+                          <Disclosure.Panel className="pt-6">
+                            <div className="space-y-4">
+                              <Slider
+                                value={value}
+                                onChange={handleRangeSelector}
+                                valueLabelFormat={(value) => `$${value}`}
+                                valueLabelDisplay="auto"
+                                min={1}
+                                max={10000}
+                              />
+                            </div>
+                          </Disclosure.Panel>
+                        </>
+                      )}
+                    </Disclosure>
                   </form>
                 </Dialog.Panel>
               </Transition.Child>
@@ -235,7 +372,7 @@ export default function ProductPage() {
           </Dialog>
         </Transition.Root>
 
-        <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <main className="mx-auto max-w-7xl px-4 sm:px-4 lg:px-6">
           <div className="flex items-baseline justify-between border-b border-gray-200 pb-6 pt-24">
             <h1 className="text-4xl font-bold tracking-tight text-gray-900">
               New Arrivals
@@ -267,18 +404,24 @@ export default function ProductPage() {
                       {sortOptions.map((option) => (
                         <Menu.Item key={option.name}>
                           {({ active }) => (
-                            <a
-                              href={option.href}
+                            <p
+                              onClick={() =>
+                                handleSort(
+                                  option,
+                                  option.sortBy,
+                                  option.sortOrder
+                                )
+                              }
                               className={classNames(
                                 option.current
                                   ? "font-medium text-gray-900"
                                   : "text-gray-500",
                                 active ? "bg-gray-100" : "",
-                                "block px-4 py-2 text-sm"
+                                "block px-4 py-2 text-sm cursor-pointer"
                               )}
                             >
                               {option.name}
-                            </a>
+                            </p>
                           )}
                         </Menu.Item>
                       ))}
@@ -415,7 +558,7 @@ export default function ProductPage() {
                           <Slider
                             value={value}
                             onChange={handleRangeSelector}
-                            valueLabelFormat={(value) => `Rs${value}`}
+                            valueLabelFormat={(value) => `$${value}`}
                             valueLabelDisplay="auto"
                             min={1}
                             max={10000}
@@ -428,12 +571,22 @@ export default function ProductPage() {
               </form>
               {/* Product grid */}
               <div className="lg:col-span-3 md:col-span-2 w-full">
-                <div className="flex flex-wrap justify-center bg-white py-5">
-                  {mensShirts.map((item, index) => (
-                    <ProductCard key={index} product={item} />
-                  ))}
+                <div className="flex flex-wrap bg-white py-5">
+                  {product.products &&
+                    product.products?.pageContent.map((item, index) => (
+                      <ProductCard key={index} product={item} />
+                    ))}
                 </div>
               </div>
+            </div>
+          </section>
+          <section className="w-full px-[3.6rem]">
+            <div className="ps-4 py-5 flex justify-center">
+              <Pagination
+                count={product.products?.totalPages}
+                color="primary"
+                onChange={handlePagination}
+              />
             </div>
           </section>
         </main>
