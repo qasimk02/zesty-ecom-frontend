@@ -11,7 +11,7 @@ import {
 } from "@heroicons/react/20/solid";
 import ProductCard from "../components/Card/ProductCard/ProductCard";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { Pagination, Slider } from "@mui/material";
+import { Box, CircularProgress, Pagination, Slider } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { findProducts, findProductsByCategory } from "../state/Product/action";
 
@@ -572,10 +572,18 @@ export default function ProductPage() {
               {/* Product grid */}
               <div className="lg:col-span-3 md:col-span-2 w-full">
                 <div className="flex flex-wrap bg-white py-5">
-                  {product.products &&
+                  {product?.loading ? (
+                    <div className="flex items-center justify-center">
+                      <Box sx={{ display: "flex", justifyContent: "center" }}>
+                        <CircularProgress size={70} />
+                      </Box>
+                    </div>
+                  ) : (
+                    product.products &&
                     product.products?.pageContent.map((item, index) => (
                       <ProductCard key={index} product={item} />
-                    ))}
+                    ))
+                  )}
                 </div>
               </div>
             </div>

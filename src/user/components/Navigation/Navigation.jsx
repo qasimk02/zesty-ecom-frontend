@@ -184,6 +184,9 @@ export default function Navigation() {
   const handleCategoryClick = (category, section, item, close) => {
     navigate(`/${category.id}/${section.id}/${item.name}`);
     setOpen(false);
+    if (close) {
+      close();
+    }
   };
 
   const handleCart = () => {
@@ -201,14 +204,25 @@ export default function Navigation() {
     handleCloseUserMenu();
   };
 
+  const pathMatched = (pathname) => {
+    const patternOne = /^\/[^/]+\/[^/]+\/[^/]+$/; // Matches '/:levelOne/:levelTwo/:levelThree'
+    const patternTwo = /^\/product\/[^/]+$/; // Matches '/product/:productId'
+
+    return patternOne.test(pathname) || patternTwo.test(pathname);
+  };
+
   //use effects(if there is jwt token in localstorage then will fetch the data)
   useEffect(() => {
     const isTokenExpired = checkTokenExpiry(jwtToken);
-    if (!isTokenExpired) {
-      dispatch(getUser(jwtToken));
-    } else {
-      // Handle token expiration, e.g., show login auth modal
-      handleOpenAuthModal();
+    //if pattern doesn't match the pbulicly access url and if it matches
+    //then do nothing
+    if (!pathMatched(location.pathname)) {
+      if (isTokenExpired) {
+        // Handle token expiration, e.g., show login auth modal
+        handleOpenAuthModal();
+      } else {
+        dispatch(getUser(jwtToken));
+      }
     }
   }, [jwtToken, auth.jwtToken]);
 
@@ -398,7 +412,7 @@ export default function Navigation() {
 
       <header className="relative bg-white">
         <p className="flex h-10 items-center justify-center bg-indigo-600 px-4 text-sm font-medium text-white sm:px-6 lg:px-8">
-          Get free delivery on orders over $100
+          Free Delivery
         </p>
 
         <nav
@@ -459,87 +473,91 @@ export default function Navigation() {
                           >
                             <Popover.Panel className="absolute inset-x-0 top-full text-sm text-gray-500">
                               {/* Presentational element used to render the bottom shadow, if we put the shadow on the actual panel it pokes out the top, so we use this shorter element to hide the top of the shadow */}
-                              <div
-                                className="absolute inset-0 top-1/2 bg-white shadow"
-                                aria-hidden="true"
-                              />
+                              {({ close }) => (
+                                <div>
+                                  <div
+                                    className="absolute inset-0 top-1/2 bg-white shadow"
+                                    aria-hidden="true"
+                                  />
 
-                              <div className="relative bg-white">
-                                <div className="mx-auto max-w-7xl px-8">
-                                  <div className="grid grid-cols-2 gap-x-8 gap-y-10 py-16">
-                                    <div className="col-start-2 grid grid-cols-2 gap-x-8">
-                                      {category.featured.map((item) => (
-                                        <div
-                                          key={item.name}
-                                          className="group relative text-base sm:text-sm"
-                                        >
-                                          <div className="aspect-h-1 aspect-w-1 overflow-hidden rounded-lg bg-gray-100 group-hover:opacity-75">
-                                            <img
-                                              src={item.imageSrc}
-                                              alt={item.imageAlt}
-                                              className="object-cover object-center"
-                                            />
-                                          </div>
-                                          <a
-                                            href={item.href}
-                                            className="mt-6 block font-medium text-gray-900"
-                                          >
-                                            <span
-                                              className="absolute inset-0 z-10"
-                                              aria-hidden="true"
-                                            />
-                                            {item.name}
-                                          </a>
-                                          <p
-                                            aria-hidden="true"
-                                            className="mt-1"
-                                          >
-                                            Shop now
-                                          </p>
-                                        </div>
-                                      ))}
-                                    </div>
-                                    <div className="row-start-1 grid grid-cols-3 gap-x-8 gap-y-10 text-sm">
-                                      {category.sections.map((section) => (
-                                        <div key={section.name}>
-                                          <p
-                                            id={`${section.name}-heading`}
-                                            className="font-medium text-gray-900"
-                                          >
-                                            {section.name}
-                                          </p>
-                                          <ul
-                                            aria-labelledby={`${section.name}-heading`}
-                                            className="mt-6 space-y-6 sm:mt-4 sm:space-y-4"
-                                          >
-                                            {section.items.map((item) => (
-                                              <li
-                                                key={item.name}
-                                                className="flex"
+                                  <div className="relative bg-white">
+                                    <div className="mx-auto max-w-7xl px-8">
+                                      <div className="grid grid-cols-2 gap-x-8 gap-y-10 py-16">
+                                        <div className="col-start-2 grid grid-cols-2 gap-x-8">
+                                          {category.featured.map((item) => (
+                                            <div
+                                              key={item.name}
+                                              className="group relative text-base sm:text-sm"
+                                            >
+                                              <div className="aspect-h-1 aspect-w-1 overflow-hidden rounded-lg bg-gray-100 group-hover:opacity-75">
+                                                <img
+                                                  src={item.imageSrc}
+                                                  alt={item.imageAlt}
+                                                  className="object-cover object-center"
+                                                />
+                                              </div>
+                                              <a
+                                                href={item.href}
+                                                className="mt-6 block font-medium text-gray-900"
                                               >
-                                                {/* handling click(route change) */}
-                                                <p
-                                                  onClick={() =>
-                                                    handleCategoryClick(
-                                                      category,
-                                                      section,
-                                                      item
-                                                      // close
-                                                    )
-                                                  }
-                                                  className="cursor-pointer hover:text-gray-800"
-                                                >
-                                                  {item.name}
-                                                </p>
-                                              </li>
-                                            ))}
-                                          </ul>
+                                                <span
+                                                  className="absolute inset-0 z-10"
+                                                  aria-hidden="true"
+                                                />
+                                                {item.name}
+                                              </a>
+                                              <p
+                                                aria-hidden="true"
+                                                className="mt-1"
+                                              >
+                                                Shop now
+                                              </p>
+                                            </div>
+                                          ))}
                                         </div>
-                                      ))}
+                                        <div className="row-start-1 grid grid-cols-3 gap-x-8 gap-y-10 text-sm">
+                                          {category.sections.map((section) => (
+                                            <div key={section.name}>
+                                              <p
+                                                id={`${section.name}-heading`}
+                                                className="font-medium text-gray-900"
+                                              >
+                                                {section.name}
+                                              </p>
+                                              <ul
+                                                aria-labelledby={`${section.name}-heading`}
+                                                className="mt-6 space-y-6 sm:mt-4 sm:space-y-4"
+                                              >
+                                                {section.items.map((item) => (
+                                                  <li
+                                                    key={item.name}
+                                                    className="flex"
+                                                  >
+                                                    {/* handling click(route change) */}
+                                                    <p
+                                                      onClick={() =>
+                                                        handleCategoryClick(
+                                                          category,
+                                                          section,
+                                                          item,
+                                                          close
+                                                        )
+                                                      }
+                                                      className="cursor-pointer hover:text-gray-800"
+                                                    >
+                                                      {item.name}
+                                                    </p>
+                                                  </li>
+                                                ))}
+                                              </ul>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </div>
                                     </div>
                                   </div>
                                 </div>
-                              </div>
+                              )}
                             </Popover.Panel>
                           </Transition>
                         </>

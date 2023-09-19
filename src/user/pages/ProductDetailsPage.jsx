@@ -8,6 +8,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { findProductById } from "../state/Product/action";
 import { useDispatch, useSelector } from "react-redux";
 import { addItemToCart } from "../state/Cart/action";
+import { findRatings, findReviews } from "../state/ReviewAndRating/action";
 
 const dummyProduct = {
   name: "Basic Tee 6-Pack",
@@ -67,16 +68,27 @@ export default function ProductDetailsPage() {
   const dispatch = useDispatch();
   const params = useParams();
   const { product } = useSelector((store) => store);
+  const { reviewAndRating } = useSelector((store) => store);
 
   const handleAddToCart = () => {
     const data = { productId: params.productId, size: selectedSize };
-    dispatch(addItemToCart(data));
-    navigate("/cart");
+    if (selectedSize != "") {
+      dispatch(addItemToCart(data));
+      navigate("/cart");
+    } else {
+      alert("Select a size");
+    }
   };
 
   useEffect(() => {
     const data = { productId: params.productId };
     dispatch(findProductById(data));
+  }, [params.productId]);
+
+  useEffect(() => {
+    const pId = params.productId;
+    dispatch(findRatings(pId));
+    dispatch(findReviews(pId));
   }, [params.productId]);
 
   return (
@@ -169,13 +181,12 @@ export default function ProductDetailsPage() {
                 <div className="flex items-center space-x-3">
                   <Rating
                     name="read-only"
-                    value={4.5}
+                    value={reviewAndRating?.ratings?.averageRating || "0"}
                     precision={0.5}
                     readOnly
                   />
-                  <p className="opacity-50 text-sm">5686 Ratings</p>
-                  <p className="ml3 text-sm font-medium text-indigo-600">
-                    3870 Reviews
+                  <p className="opacity-50 text-sm">
+                    {reviewAndRating?.ratings?.totalRatings} Ratings
                   </p>
                 </div>
               </div>
@@ -376,8 +387,14 @@ export default function ProductDetailsPage() {
               <Grid item xs={12} lg={5} md={5}>
                 <h1 className="text-xl font-semibold pb-1">Product Ratings</h1>
                 <div className="flex items-center space-x-3">
-                  <Rating value={4.5} precision={0.5} readOnly />
-                  <p className="opacity-60">5898 Ratings</p>
+                  <Rating
+                    value={reviewAndRating?.ratings?.averageRating || "0"}
+                    precision={0.5}
+                    readOnly
+                  />
+                  <p className="opacity-60">
+                    {reviewAndRating?.ratings?.totalRatings} Ratings
+                  </p>
                 </div>
                 <Box className="my-5 space-y-2">
                   <Grid container alignItems="center" gap={2}>
@@ -388,12 +405,19 @@ export default function ProductDetailsPage() {
                       <LinearProgress
                         sx={{ bgcolor: "#d0d0d0", borderRadius: 4, height: 7 }}
                         variant="determinate"
-                        value={55}
+                        value={
+                          reviewAndRating?.ratings?.ratingPercentByValue[5] *
+                            100 || "0"
+                        }
                         color="success"
                       />
                     </Grid>
                     <Grid item>
-                      <p className="opacity-60">45%</p>
+                      <p className="opacity-60">
+                        {reviewAndRating?.ratings?.ratingPercentByValue[5] *
+                          100}
+                        %
+                      </p>
                     </Grid>
                   </Grid>
                   <Grid container alignItems="center" gap={2}>
@@ -404,12 +428,19 @@ export default function ProductDetailsPage() {
                       <LinearProgress
                         sx={{ bgcolor: "#d0d0d0", borderRadius: 4, height: 7 }}
                         variant="determinate"
-                        value={40}
+                        value={
+                          reviewAndRating?.ratings?.ratingPercentByValue[4] *
+                            100 || "0"
+                        }
                         color="secondary"
                       />
                     </Grid>
                     <Grid item>
-                      <p className="opacity-60">25%</p>
+                      <p className="opacity-60">
+                        {reviewAndRating?.ratings?.ratingPercentByValue[4] *
+                          100}
+                        %
+                      </p>
                     </Grid>
                   </Grid>
                   <Grid container alignItems="center" gap={2}>
@@ -424,12 +455,19 @@ export default function ProductDetailsPage() {
                           height: 7,
                         }}
                         variant="determinate"
-                        value={30}
+                        value={
+                          reviewAndRating?.ratings?.ratingPercentByValue[3] *
+                            100 || "0"
+                        }
                         color="primary"
                       />
                     </Grid>
                     <Grid item>
-                      <p className="opacity-60">15%</p>
+                      <p className="opacity-60">
+                        {reviewAndRating?.ratings?.ratingPercentByValue[3] *
+                          100}
+                        %
+                      </p>
                     </Grid>
                   </Grid>
                   <Grid container alignItems="center" gap={2}>
@@ -440,12 +478,19 @@ export default function ProductDetailsPage() {
                       <LinearProgress
                         sx={{ bgcolor: "#d0d0d0", borderRadius: 4, height: 7 }}
                         variant="determinate"
-                        value={20}
+                        value={
+                          reviewAndRating?.ratings?.ratingPercentByValue[2] *
+                            100 || "0"
+                        }
                         color="warning"
                       />
                     </Grid>
                     <Grid item>
-                      <p className="opacity-60">10%</p>
+                      <p className="opacity-60">
+                        {reviewAndRating?.ratings?.ratingPercentByValue[2] *
+                          100}
+                        %
+                      </p>
                     </Grid>
                   </Grid>
                   <Grid container alignItems="center" gap={2}>
@@ -456,12 +501,19 @@ export default function ProductDetailsPage() {
                       <LinearProgress
                         sx={{ bgcolor: "#d0d0d0", borderRadius: 4, height: 7 }}
                         variant="determinate"
-                        value={10}
+                        value={
+                          reviewAndRating?.ratings?.ratingPercentByValue[1] *
+                            100 || "0"
+                        }
                         color="error"
                       />
                     </Grid>
                     <Grid item>
-                      <p className="opacity-60">5%</p>
+                      <p className="opacity-60">
+                        {reviewAndRating?.ratings?.ratingPercentByValue[1] *
+                          100}
+                        %
+                      </p>
                     </Grid>
                   </Grid>
                 </Box>
@@ -482,10 +534,11 @@ export default function ProductDetailsPage() {
                   </div>
                 </div>
               </Grid>
+
               <Grid item xs={12} lg={7} md={7}>
                 <div className="space-y-6">
-                  {[1, 1, 1, 1, 1].map((review, index) => (
-                    <ProductReviewCard key={index} />
+                  {reviewAndRating?.reviews?.map((review) => (
+                    <ProductReviewCard review={review} key={review?.reviewId} />
                   ))}
                 </div>
               </Grid>
