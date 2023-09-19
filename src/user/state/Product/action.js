@@ -1,4 +1,6 @@
 import {
+  DELETE_PRODUCT_FAILURE,
+  DELETE_PRODUCT_SUCCESS,
   FIND_PRODUCTS_BY_CATEGORY_FAILURE,
   FIND_PRODUCTS_BY_CATEGORY_REQUEST,
   FIND_PRODUCTS_BY_CATEGORY_SUCCESS,
@@ -46,6 +48,17 @@ const findProductsByCategoryFailure = (error) => ({
   payload: error,
 });
 
+//DELETE product
+const deleteProductRequest = () => ({ type: DELETE_PRODUCT_FAILURE });
+const deleteProductSuccess = (data) => ({
+  type: DELETE_PRODUCT_SUCCESS,
+  payload: data,
+});
+const deleteProductFailure = (error) => ({
+  type: DELETE_PRODUCT_FAILURE,
+  payload: error,
+});
+
 //FIND ALL PRODUCTS
 export const findProducts = (reqData) => async (dispatch) => {
   dispatch(findPrdouctsRequest);
@@ -64,8 +77,8 @@ export const findProducts = (reqData) => async (dispatch) => {
     const { data } = await api.get(
       `/api/products?sortBy=${sortBy}&sortOrder=${sortOrder}&pageNumber=${pageNumber}&pageSize=${pageSize}&minPrice=${minPrice}&maxPrice=${maxPrice}&minDiscount=${minDiscount}&color=${colors}&size=${sizes}`
     );
-    dispatch(findPrdouctsSuccess(data));
     console.log(data);
+    dispatch(findPrdouctsSuccess(data));
   } catch (error) {
     dispatch(findPrdouctsFailure(error));
   }
@@ -78,7 +91,6 @@ export const findProductById = (reqData) => async (dispatch) => {
   try {
     const { data } = await api.get(`/api/products/${productId}`);
     dispatch(findPrdouctByIdSuccess(data));
-    console.log(data);
   } catch (error) {
     dispatch(findPrdouctByIdFailure(error));
   }
@@ -107,5 +119,17 @@ export const findProductsByCategory = (reqData) => async (dispatch) => {
     dispatch(findProductsByCategorySuccess(data));
   } catch (error) {
     dispatch(findProductsByCategoryFailure(error));
+  }
+};
+
+//Delete Product
+export const deleteProduct = (pId) => async (dispatch) => {
+  dispatch(deleteProductRequest);
+  try {
+    const { data } = await api.delete(`/api/products/${pId}`);
+    console.log(data);
+    dispatch(deleteProductSuccess(data));
+  } catch (error) {
+    dispatch(deleteProductFailure(error));
   }
 };

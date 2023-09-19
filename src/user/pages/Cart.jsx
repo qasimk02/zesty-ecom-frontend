@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 const Cart = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { auth } = useSelector((store) => store);
   const { cart } = useSelector((store) => store);
 
   const handleCheckout = () => {
