@@ -1,21 +1,28 @@
 import { Box, Button, Grid, TextField } from "@mui/material";
 import React from "react";
 import AddressCard from "../Card/AddressCard/AddressCard";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { createOrder } from "../../state/Order/action";
 
 const DeliveryAddressForm = () => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const data = new FormData(e.currentTarget);
     const address = {
-      firstName: data.get("firstName"),
-      lastName: data.get("lastName"),
+      fullName: data.get("firstName") + " " + data.get("lastName"),
       streetAddress: data.get("address"),
       city: data.get("city"),
       state: data.get("state"),
-      zipCode: data.get("zip"),
-      mobile: data.get("phoneNumber"),
+      country: data.get("country"),
+      postalCode: data.get("zip"),
+      phoneNumber: data.get("phoneNumber"),
     };
-    console.log("address", address);
+    const orderData = { address, navigate };
+    dispatch(createOrder(orderData));
   };
 
   return (
@@ -76,6 +83,28 @@ const DeliveryAddressForm = () => {
                 <Grid item xs={12} sm={6}>
                   <TextField
                     required
+                    id="zip"
+                    name="zip"
+                    label="Zip / Postal Code"
+                    fullWidth
+                    type="number"
+                    autoComplete="shipping postal-code"
+                  />
+                </Grid>{" "}
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    required
+                    id="phoneNumber"
+                    name="phoneNumber"
+                    label="Phone Number"
+                    fullWidth
+                    type="number"
+                    autoComplete="given-name"
+                  />{" "}
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    required
                     id="city"
                     name="city"
                     label="City"
@@ -93,25 +122,13 @@ const DeliveryAddressForm = () => {
                     autoComplete="given-name"
                   />{" "}
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                <Grid item xs={12} sm={12}>
                   <TextField
                     required
-                    id="zip"
-                    name="zip"
-                    label="Zip / Postal Code"
+                    id="country"
+                    name="country"
+                    label="Country"
                     fullWidth
-                    type="number"
-                    autoComplete="shipping postal-code"
-                  />
-                </Grid>{" "}
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    required
-                    id="phoneNumber"
-                    name="phoneNumber"
-                    label="Phone Number"
-                    fullWidth
-                    type="number"
                     autoComplete="given-name"
                   />{" "}
                 </Grid>

@@ -6,6 +6,9 @@ import ProductPage from "../user/pages/ProductPage";
 import ProductDetailsPage from "../user/pages/ProductDetailsPage";
 import Checkout from "../user/pages/Checkout";
 import Order from "../user/pages/Order";
+import Footer from "../user/components/Footer/Footer";
+import OrderDetails from "../user/pages/OrderDetails";
+import PaymentSuccess from "../user/components/Payment/PaymentSuccess";
 
 const CustomerRouters = () => {
   return (
@@ -14,15 +17,32 @@ const CustomerRouters = () => {
         <Navigation />
       </div>
       <Routes>
+        <Route path="/login" element={<HomePage />}></Route>
+        <Route path="/register" element={<HomePage />}></Route>
         <Route path="/" element={<HomePage />}></Route>
         <Route path="/cart" element={<Cart />}></Route>
-        <Route path="/products" element={<ProductPage />}></Route>
-        <Route path="/productDetails" element={<ProductDetailsPage />}></Route>
+        <Route
+          path="/:levelOne/:levelTwo/:levelThree"
+          element={<ProductPage />}
+        ></Route>
+        <Route
+          path="/product/:productId"
+          element={<ProductDetailsPage />}
+        ></Route>
         <Route path="/checkout" element={<Checkout />}></Route>
-        <Route path="/order" element={<Order />}></Route>
+        <Route path="/account/order" element={<Order />}></Route>
+        <Route
+          path="/account/order/:orderId"
+          element={<OrderDetails />}
+        ></Route>
+        <Route
+          path="/account/order/:orderId"
+          element={<OrderDetails />}
+        ></Route>
+        <Route path="/payment/:orderId" element={<PaymentSuccess />}></Route>
       </Routes>
       <div>
-        <footer />
+        <Footer />
       </div>
     </div>
   );
