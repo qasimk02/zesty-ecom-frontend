@@ -4,6 +4,7 @@ import CustomerRouters from "./Routers/CustomerRouters";
 import AdminRouters from "./Routers/AdminRouters";
 import { useSelector } from "react-redux";
 
+
 function App() {
   const { auth } = useSelector((store) => store);
   return (
@@ -13,6 +14,7 @@ function App() {
 
         <Route path="/admin/*" element={<AdminRouters />}></Route>
       </Routes>
+
     </div>
   );
 }
