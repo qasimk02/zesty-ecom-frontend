@@ -8,7 +8,6 @@ import { useDispatch, useSelector } from "react-redux";
 const Cart = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { auth } = useSelector((store) => store);
   const { cart } = useSelector((store) => store);
 
   const handleCheckout = () => {
@@ -17,11 +16,15 @@ const Cart = () => {
 
   useEffect(() => {
     dispatch(getCart());
-  }, []);
+  }, [dispatch]);
 
   return (
     <div className="p-2 mt-2">
-      {cart?.cartItems.length > 0 && !cart?.isLoading ? (
+      {cart?.isLoading ? (
+        <Box sx={{ display: "flex", justifyContent: "center" }}>
+          <CircularProgress size={70} />
+        </Box>
+      ) : cart?.cartItems.length > 0 && !cart?.isLoading ? (
         <div className="lg:grid lg:grid-cols-3 lg:px-16 relative">
           <div className="col-span-2 space-y-1">
             {cart.cartItems?.map((item) => (
@@ -42,7 +45,10 @@ const Cart = () => {
                 <div className="flex justify-between pt-3 text-black">
                   <span>Discount</span>
                   <span className="text-green-600">
-                    ${cart.cart?.totalPrice - cart.cart?.totalDiscountedPrice}
+                    $
+                    {(
+                      cart.cart?.totalPrice - cart.cart?.totalDiscountedPrice
+                    ).toFixed(2)}
                   </span>
                 </div>
                 <div className="flex justify-between pt-3 text-black">
@@ -52,7 +58,7 @@ const Cart = () => {
                 <div className="flex justify-between pt-3 text-black">
                   <span>Total Amount</span>
                   <span className="text-green-600">
-                    ${cart.cart?.totalDiscountedPrice}
+                    ${(cart.cart?.totalDiscountedPrice).toFixed(2)}
                   </span>
                 </div>
               </div>
@@ -67,10 +73,6 @@ const Cart = () => {
             </div>
           </div>
         </div>
-      ) : cart?.isLoading ? (
-        <Box sx={{ display: "flex", justifyContent: "center" }}>
-          <CircularProgress size={70} />
-        </Box>
       ) : (
         <div className="flex justify-center flex-col items-center">
           <h2 className="text-red-600 text-lg">Cart is empty</h2>

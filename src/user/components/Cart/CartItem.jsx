@@ -4,6 +4,7 @@ import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { useDispatch } from "react-redux";
 import { removeCartItem, updateCartItem } from "../../state/Cart/action";
+import { ResponsiveImages } from "../../utilities/responsiveImage";
 
 const CartItem = ({ item }) => {
   const dispatch = useDispatch();
@@ -25,10 +26,10 @@ const CartItem = ({ item }) => {
     <div className="p-5 shadow-lg border rounded-md">
       <div className="flex items-center">
         <div className="w-[9rem] h-[9rem]">
-          <img
-            className="w-full h-full object-cover object-top"
-            src={item?.product?.imageName}
-            alt="mens_shirt"
+          <ResponsiveImages
+            imageName={item?.product?.images[0].imageName}
+            id={item?.product?.productId}
+            classess={"w-full h-full object-cover object-top"}
           />
         </div>
         <div className="ml-5 space-y-1">

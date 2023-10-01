@@ -4,6 +4,9 @@ import {
   ADD_ITEM_TO_CART_REQUEST,
   ADD_ITEM_TO_CART_SUCCESS,
   GET_CART_FAILURE,
+  GET_CART_ITEMS_COUNT_FAILURE,
+  GET_CART_ITEMS_COUNT_REQUEST,
+  GET_CART_ITEMS_COUNT_SUCCESS,
   GET_CART_REQUEST,
   GET_CART_SUCCESS,
   REMOVE_CART_ITEM_FAILURE,
@@ -30,6 +33,17 @@ const getCartRequest = () => ({ type: GET_CART_REQUEST });
 const getCartSuccess = (data) => ({ type: GET_CART_SUCCESS, payload: data });
 const getCartFailure = (error) => ({ type: GET_CART_FAILURE, payload: error });
 
+//get cart items count
+const getCartItemsCountRequest = () => ({ type: GET_CART_ITEMS_COUNT_REQUEST });
+const getCartItemsCountSuccess = (data) => ({
+  type: GET_CART_ITEMS_COUNT_SUCCESS,
+  payload: data,
+});
+const getCartItemsCountFailure = (error) => ({
+  type: GET_CART_ITEMS_COUNT_FAILURE,
+  payload: error,
+});
+
 //update cart item
 const updateCartItemRequest = () => ({ type: UPDATE_CART_ITEM_REQUEST });
 const updateCartItemSuccess = (data) => ({
@@ -54,7 +68,7 @@ const removeCartItemFailure = (error) => ({
 
 //get cart
 export const getCart = () => async (dispatch) => {
-  dispatch(getCartRequest);
+  dispatch(getCartRequest());
   try {
     const { data } = await api.get("/api/cart");
     dispatch(getCartSuccess(data));
@@ -63,9 +77,20 @@ export const getCart = () => async (dispatch) => {
   }
 };
 
+//get cart items count
+export const getCartItemsCount = () => async (dispatch) => {
+  dispatch(getCartItemsCountRequest());
+  try {
+    const { data } = await api.get("/api/cart/count");
+    dispatch(getCartItemsCountSuccess(data));
+    console.log("cart count", data);
+  } catch (error) {
+    dispatch(getCartItemsCountFailure(error));
+  }
+};
 //add item to cart
 export const addItemToCart = (reqData) => async (dispatch) => {
-  dispatch(addItemToCartRequest);
+  dispatch(addItemToCartRequest());
   try {
     const { data } = await api.post("/api/cart", reqData);
     dispatch(addItemToCartSuccess(data));
@@ -76,7 +101,7 @@ export const addItemToCart = (reqData) => async (dispatch) => {
 
 //update cart item
 export const updateCartItem = (reqData) => async (dispatch) => {
-  dispatch(updateCartItemRequest);
+  dispatch(updateCartItemRequest());
   try {
     const { data } = await api.post("/api/cart", reqData);
     dispatch(updateCartItemSuccess(data));
@@ -87,7 +112,7 @@ export const updateCartItem = (reqData) => async (dispatch) => {
 
 //add item to cart
 export const removeCartItem = (cartItemId) => async (dispatch) => {
-  dispatch(removeCartItemRequest);
+  dispatch(removeCartItemRequest());
   try {
     const { data } = await api.delete(`/api/cart/${cartItemId}`);
     dispatch(removeCartItemSuccess(data));

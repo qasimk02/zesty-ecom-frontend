@@ -1,4 +1,4 @@
-import { Box, Button, Fade, Modal, Typography } from "@mui/material";
+import { Box, Fade, Modal } from "@mui/material";
 import React from "react";
 import Register from "./register";
 import Login from "./login";

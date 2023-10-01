@@ -1,19 +1,18 @@
 import { Fragment, useEffect, useState } from "react";
 import { Dialog, Popover, Tab, Transition } from "@headlessui/react";
-import profile from "../Card/ProductReviewCard/qasim.png";
 import {
   Bars3Icon,
   MagnifyingGlassIcon,
   ShoppingBagIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import { Avatar, Box, Button, Menu, MenuItem } from "@mui/material";
+import { Avatar, Box, Menu, MenuItem, Skeleton } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 import AuthModal from "../auth/authModal";
 import { useDispatch, useSelector } from "react-redux";
-import { store } from "../../state/store";
 import { getUser, logout } from "../../state/Auth/action";
 import checkTokenExpiry from "../../utilities/jwtUtils";
+import { getCartItemsCount } from "../../state/Cart/action";
 
 const navigation = {
   categories: [
@@ -160,6 +159,7 @@ export default function Navigation() {
   //getting jwt
   const jwtToken = localStorage.getItem("jwtToken");
   const { auth } = useSelector((store) => store);
+  const { cart } = useSelector((store) => store);
 
   const dispatch = useDispatch();
 
@@ -213,10 +213,10 @@ export default function Navigation() {
 
   //use effects(if there is jwt token in localstorage then will fetch the data)
   useEffect(() => {
-    const isTokenExpired = checkTokenExpiry(jwtToken);
     //if pattern doesn't match the pbulicly access url and if it matches
     //then do nothing
-    if (!pathMatched(location.pathname)) {
+    if (!pathMatched(location.pathname) || jwtToken) {
+      const isTokenExpired = checkTokenExpiry(jwtToken);
       if (isTokenExpired) {
         // Handle token expiration, e.g., show login auth modal
         handleOpenAuthModal();
@@ -224,7 +224,7 @@ export default function Navigation() {
         dispatch(getUser(jwtToken));
       }
     }
-  }, [jwtToken, auth.jwtToken]);
+  }, [jwtToken, auth.jwtToken, dispatch]);
 
   //if there is user in auth then will close the auth modal
   useEffect(() => {
@@ -233,8 +233,9 @@ export default function Navigation() {
       if (location.pathname === "/login" || location.pathname === "/register") {
         navigate(-1);
       }
+      dispatch(getCartItemsCount());
     }
-  }, [auth.user]);
+  }, [auth.user, dispatch]);
 
   return (
     <div className="bg-white">
@@ -399,7 +400,10 @@ export default function Navigation() {
                         className="text-white"
                         sx={{ width: "56", height: "56", bgcolor: "#9155fd" }}
                       >
-                        <img src={profile} alt="profile" />
+                        <img
+                          src={`${process.env.PUBLIC_URL}/user/qasim.png`}
+                          alt="profile"
+                        />
                       </Avatar>
                     </Box>
                   </a>
@@ -578,51 +582,72 @@ export default function Navigation() {
               </Popover.Group>
 
               <div className="ml-auto flex items-center">
-                <div className="hidden lg:flex lg:flex-1 lg:items-center lg:justify-end lg:space-x-6">
-                  {auth.user?.firstName ? (
-                    <div className="hidden lg:ml-8 lg:flex">
-                      <Box>
-                        <Avatar
-                          onClick={handleClickUserMenu}
-                          sx={{
-                            width: "56",
-                            height: "56",
-                            cursor: "pointer",
-                            backgroundColor: "#9155FD",
+                {auth?.isLoading ? (
+                  <Skeleton
+                    animation="wave"
+                    variant="circle"
+                    width={40}
+                    height={40}
+                    sx={{ borderRadius: "50%" }}
+                  />
+                ) : (
+                  <div className="hidden lg:flex lg:flex-1 lg:items-center lg:justify-end lg:space-x-6">
+                    {auth.user?.firstName ? (
+                      <div className="hidden lg:ml-8 lg:flex">
+                        <Box>
+                          <Avatar
+                            onClick={handleClickUserMenu}
+                            sx={{
+                              width: "56",
+                              height: "56",
+                              cursor: "pointer",
+                              backgroundColor: "#9155FD",
+                            }}
+                          >
+                            {auth.user?.imageUrl ? (
+                              <img
+                                src={`${process.env.PUBLIC_URL}/user/qasim.png`}
+                                alt="profile"
+                              />
+                            ) : (
+                              <p>{auth.user?.firstName[0].toUpperCase()}</p>
+                            )}
+                          </Avatar>
+                        </Box>
+                        <Menu
+                          id="basic-menu"
+                          anchorEl={userMenu}
+                          open={isopen}
+                          onClose={handleCloseUserMenu}
+                          MenuListProps={{
+                            "aria-labelledby": "basic-button",
                           }}
                         >
-                          {auth.user?.imageUrl ? (
-                            <img src={profile} alt="profile" />
-                          ) : (
-                            <p>{auth.user?.firstName[0].toUpperCase()}</p>
+                          <MenuItem onClick={handleCloseUserMenu}>
+                            Profile
+                          </MenuItem>
+                          <MenuItem onClick={handleMyOrders}>
+                            My Orders
+                          </MenuItem>
+                          {/* dashboard chek */}
+                          {auth?.user?.role.name === "ROLE_ADMIN" && (
+                            <MenuItem onClick={() => navigate("/admin")}>
+                              Dashboard
+                            </MenuItem>
                           )}
-                        </Avatar>
-                      </Box>
-                      <Menu
-                        id="basic-menu"
-                        anchorEl={userMenu}
-                        open={isopen}
-                        onClose={handleCloseUserMenu}
-                        MenuListProps={{
-                          "aria-labelledby": "basic-button",
-                        }}
+                          <MenuItem onClick={handleLogout}>Logout</MenuItem>
+                        </Menu>
+                      </div>
+                    ) : (
+                      <div
+                        onClick={handleOpenAuthModal}
+                        className="text-sm font-medium text-gray-700 hover:text-gray-800 cursor-pointer"
                       >
-                        <MenuItem onClick={handleCloseUserMenu}>
-                          Profile
-                        </MenuItem>
-                        <MenuItem onClick={handleMyOrders}>My Orders</MenuItem>
-                        <MenuItem onClick={handleLogout}>Logout</MenuItem>
-                      </Menu>
-                    </div>
-                  ) : (
-                    <div
-                      onClick={handleOpenAuthModal}
-                      className="text-sm font-medium text-gray-700 hover:text-gray-800 cursor-pointer"
-                    >
-                      Sign in
-                    </div>
-                  )}
-                </div>
+                        Sign in
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* Search */}
                 <div className="flex lg:ml-6">
@@ -646,7 +671,7 @@ export default function Navigation() {
                       aria-hidden="true"
                     />
                     <span className="ml-2 text-sm font-medium text-gray-700 group-hover:text-gray-800">
-                      0
+                      {cart?.cartCount ? cart?.cartCount : "0"}
                     </span>
                   </a>
                 </div>

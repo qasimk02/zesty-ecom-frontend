@@ -1,6 +1,6 @@
+import { React, useEffect, useState } from "react";
 import {
   Avatar,
-  Button,
   Card,
   CardHeader,
   Paper,
@@ -10,13 +10,17 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  Typography,
 } from "@mui/material";
-import { useEffect } from "react";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 import {
   deleteProduct,
   findProducts,
 } from "../../../user/state/Product/action";
 import { useDispatch, useSelector } from "react-redux";
+import { ResponsiveImages } from "../../../user/utilities/responsiveImage";
 
 const columns = [
   { id: "image", label: "Image", minWidth: 100 },
@@ -51,6 +55,9 @@ const ProductDetails = () => {
   const dispatch = useDispatch();
   const { product } = useSelector((store) => store);
 
+  //hanlde dropdown
+
+  //handle dropdown actions
   const handleDeleteProduct = (id) => {
     dispatch(deleteProduct(id));
   };
@@ -71,9 +78,13 @@ const ProductDetails = () => {
     dispatch(findProducts(data));
   }, [product.deletedProductId]);
   return (
-    <div className="p-5">
+    <div className="">
       <Card className="mt-2">
-        <CardHeader title="All Products" />
+        <CardHeader
+          title="All Products"
+          sx={{ textAlign: "center" }}
+          className="py-5"
+        />
         <Paper
           sx={{
             width: "100%",
@@ -81,14 +92,18 @@ const ProductDetails = () => {
           }}
         >
           <TableContainer>
-            <Table stickyHeader aria-label="sticky table">
+            <Table
+              stickyHeader
+              sx={{ minWidth: 650 }}
+              aria-label="sticky table"
+            >
               <TableHead>
                 <TableRow>
                   {columns.map((column) => (
                     <TableCell
                       key={column.id}
                       align={column.align}
-                      style={{ minWidth: column.minWidth }}
+                      // style={{ minWidth: column.minWidth }}
                     >
                       {column.label}
                     </TableCell>
@@ -104,14 +119,22 @@ const ProductDetails = () => {
                     >
                       <TableCell>
                         {" "}
-                        <Avatar src={item.imageName} />
+                        <Avatar>
+                          <ResponsiveImages
+                            imageName={item?.images[0].imageName}
+                            id={item?.productId}
+                            classess={
+                              "h-full w-full object-cover object-center"
+                            }
+                          />
+                        </Avatar>
                       </TableCell>
                       <TableCell component="th" scope="row" align="left">
                         {item.name}
                       </TableCell>
                       <TableCell align="left">
                         {" "}
-                        {item.categories[2].title.toUpperCase()}
+                        {item.category.title.toUpperCase()}
                       </TableCell>
                       <TableCell align="left"> &#8377;{item.price}</TableCell>
                       <TableCell align="left">
@@ -120,13 +143,27 @@ const ProductDetails = () => {
                           return acc + currentValue.quantity;
                         }, 0)}
                       </TableCell>
-                      <TableCell align="left" sx={{ display: "flex" }}>
-                        <Button
-                          onClick={() => handleDeleteProduct(item.productId)}
-                          variant="outlined"
-                        >
-                          Delete
-                        </Button>
+                      {/* actions */}
+                      <TableCell align="left">
+                        <div className="flex space-x-2">
+                          <EditIcon
+                            sx={{
+                              cursor: "pointer",
+                              "&:hover": {
+                                color: "green",
+                              },
+                            }}
+                          />
+                          <DeleteIcon
+                            sx={{
+                              cursor: "pointer",
+                              "&:hover": {
+                                color: "red",
+                              },
+                            }}
+                            onClick={() => handleDeleteProduct(item.productId)}
+                          />
+                        </div>
                       </TableCell>
                     </TableRow>
                   );
