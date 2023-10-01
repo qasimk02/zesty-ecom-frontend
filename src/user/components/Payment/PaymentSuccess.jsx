@@ -1,5 +1,5 @@
 import { Alert, AlertTitle } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import OrderTracker from "../Order/OrderTracker";
@@ -8,9 +8,9 @@ import { updatePayment } from "../../state/Payment/action";
 import { getOrderById } from "../../state/Order/action";
 
 const PaymentSuccess = () => {
-  const [paymentId, setPaymentId] = useState("");
-  const [paymentLinkId, setPaymentLinkId] = useState("");
-  const [paymentStatus, setPaymentStatus] = useState("");
+  // const [paymentId, setPaymentId] = useState("");
+  // const [paymentLinkId, setPaymentLinkId] = useState("");
+  // const [paymentStatus, setPaymentStatus] = useState("");
   // const [referenceId, setReferenceId] = useState("");
   // const [razorpaySignature,setRazorpaySignature] = useState("");
   const { orderId } = useParams();

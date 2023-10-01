@@ -14,7 +14,7 @@ const Register = () => {
     if (jwtToken) {
       dispatch(getUser(jwtToken));
     }
-  }, [auth.jwtToken, jwtToken]);
+  }, [auth.jwtToken, jwtToken, dispatch]);
 
   const handleSubmit = (event) => {
     event.preventDefault();

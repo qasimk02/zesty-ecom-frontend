@@ -2,34 +2,39 @@ import { Grid } from "@mui/material";
 import React from "react";
 import AdjustIcon from "@mui/icons-material/Adjust";
 import { useNavigate } from "react-router-dom";
+import { ResponsiveImages } from "../../../utilities/responsiveImage";
 
-const OrderCard = () => {
+const OrderCard = ({ item }) => {
   const navigate = useNavigate();
   return (
     <div
-      onClick={() => navigate(`/account/order/${5}`)}
+      onClick={() => navigate(`/account/order/${item?.orderId}`)}
       className="p-5 shadow-md hover:shadow-2xl border"
     >
       <Grid container spacing={2} sx={{ justifyContent: "space-between" }}>
         <Grid item xs={6}>
           <div className="flex cursor-pointer">
-            <img
-              className="w-[5rem] h-[5rem] object-cover object-top"
-              src="https://tse3.mm.bing.net/th?id=OIP.FgEuC3-oXlwR7QiNiHUImgHaJo&pid=Api&P=0&h=180"
-              alt="shirt"
+            <ResponsiveImages
+              imageName={item?.orderItems[0]?.product?.images[0]?.imageName}
+              id={item?.orderItems[0]?.product?.productId}
+              classess={"w-[5rem] h-[5rem] object-cover object-top"}
             />
             <div className="ml-5 space-y-2">
-              <p className="">Men Slim Mild Black Shirt</p>
-              <p className="opacity-50 text-sm font-semibold">Size: M</p>
-              <p className="opacity-50 text-sm font-semibold">Color: Black</p>
+              <p className="">{item?.orderItems[0]?.product?.name}</p>
+              <p className="opacity-50 text-sm font-semibold">
+                Size: {item?.orderItems[0]?.size.toUpperCase()}
+              </p>
+              <p className="opacity-50 text-sm font-semibold">
+                Color: {item?.orderItems[0]?.product?.color}
+              </p>
             </div>
           </div>
         </Grid>
         <Grid item xs={2}>
-          <p>$2345</p>
+          <p>${item?.totalDiscountedPrice}</p>
         </Grid>
         <Grid item xs={4}>
-          {true && (
+          {item?.orderStatus === "DELIVERED" && (
             <div>
               <p>
                 <AdjustIcon
@@ -41,7 +46,7 @@ const OrderCard = () => {
               <p className="text-xs">Your Order has been delivered</p>
             </div>
           )}
-          {false && (
+          {item?.orderStatus !== "DELIVERED" && (
             <p>
               <span>Expected Delivery On March 03</span>
             </p>

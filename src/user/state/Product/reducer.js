@@ -1,4 +1,7 @@
 import {
+  CREATE_PRODUCT_FAILURE,
+  CREATE_PRODUCT_REQUEST,
+  CREATE_PRODUCT_SUCCESS,
   DELETE_PRODUCT_FAILURE,
   DELETE_PRODUCT_REQUEST,
   DELETE_PRODUCT_SUCCESS,
@@ -14,9 +17,9 @@ import {
 } from "./actionType";
 
 const intialState = {
-  prodcuts: null,
+  products: [],
   product: null,
-  loading: true,
+  loading: false,
   error: null,
   deletedProductId: null,
 };
@@ -27,6 +30,7 @@ export const productReducer = (state = intialState, action) => {
     case FIND_PRODUCTS_REQUEST:
     case FIND_PRODUCT_BY_ID_REQUEST:
     case FIND_PRODUCTS_BY_CATEGORY_REQUEST:
+    case CREATE_PRODUCT_REQUEST:
     case DELETE_PRODUCT_REQUEST:
       return { ...state, loading: true, error: null };
 
@@ -40,6 +44,7 @@ export const productReducer = (state = intialState, action) => {
         products: action.payload,
       };
     case FIND_PRODUCT_BY_ID_SUCCESS:
+    case CREATE_PRODUCT_SUCCESS:
       return {
         ...state,
         loading: false,
@@ -58,8 +63,9 @@ export const productReducer = (state = intialState, action) => {
     case FIND_PRODUCTS_FAILURE:
     case FIND_PRODUCT_BY_ID_FAILURE:
     case FIND_PRODUCTS_BY_CATEGORY_FAILURE:
+    case CREATE_PRODUCT_FAILURE:
     case DELETE_PRODUCT_FAILURE:
-      return { ...state, loading: false, error: action.payload };
+      return { ...state, loading: false, error: action.payload, products: [] };
     default:
       return state;
   }

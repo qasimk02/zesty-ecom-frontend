@@ -1,6 +1,7 @@
 import React from "react";
 import "./ProductCard.css";
 import { useNavigate } from "react-router-dom";
+import { ResponsiveImages } from "../../../utilities/responsiveImage";
 
 const ProductCard = ({ product }) => {
   const navigate = useNavigate();
@@ -11,11 +12,13 @@ const ProductCard = ({ product }) => {
       className="productCard w-[12rem] m-3 transition-all cursor-pointer"
     >
       <div className="h-[15rem] p-2">
-        <img
-          className="h-full w-full object-cover object-left-top"
-          src={product.imageName}
-          alt="product_image"
-        />
+        {product?.images && (
+          <ResponsiveImages
+            imageName={product.images[0].imageName}
+            id={product.productId}
+            classess={"h-full w-full object-cover object-left-top"}
+          />
+        )}
       </div>
       <div className="textPart bg-white p-3">
         <div>
@@ -24,7 +27,11 @@ const ProductCard = ({ product }) => {
         </div>
         <div className="flex items-center space-x-2">
           <p className="font-semibold">
-            ${product.price - product.price * product.discountPercent * 0.01}
+            $
+            {(
+              product.price -
+              product.price * product.discountPercent * 0.01
+            ).toFixed(2)}
           </p>
           <p className="line-through opacity-50">${product.price}</p>
           <p className="text-green-600 font-semibold">
