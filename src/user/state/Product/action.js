@@ -1,4 +1,7 @@
 import {
+  CREATE_PRODUCT_FAILURE,
+  CREATE_PRODUCT_REQUEST,
+  CREATE_PRODUCT_SUCCESS,
   DELETE_PRODUCT_FAILURE,
   DELETE_PRODUCT_SUCCESS,
   FIND_PRODUCTS_BY_CATEGORY_FAILURE,
@@ -12,6 +15,7 @@ import {
   FIND_PRODUCT_BY_ID_SUCCESS,
 } from "./actionType";
 import { api } from "../../../config/apiConfig";
+import { toast } from "react-toastify";
 
 //GET all products
 const findPrdouctsRequest = () => ({ type: FIND_PRODUCTS_REQUEST });
@@ -48,6 +52,17 @@ const findProductsByCategoryFailure = (error) => ({
   payload: error,
 });
 
+//CREATE product
+const createProductRequest = () => ({ type: CREATE_PRODUCT_REQUEST });
+const createProductSuccess = (data) => ({
+  type: CREATE_PRODUCT_SUCCESS,
+  payload: data,
+});
+const createProductFailure = (error) => ({
+  type: CREATE_PRODUCT_FAILURE,
+  payload: error,
+});
+
 //DELETE product
 const deleteProductRequest = () => ({ type: DELETE_PRODUCT_FAILURE });
 const deleteProductSuccess = (data) => ({
@@ -61,7 +76,7 @@ const deleteProductFailure = (error) => ({
 
 //FIND ALL PRODUCTS
 export const findProducts = (reqData) => async (dispatch) => {
-  dispatch(findPrdouctsRequest);
+  dispatch(findPrdouctsRequest());
   const {
     colors,
     sizes,
@@ -86,11 +101,12 @@ export const findProducts = (reqData) => async (dispatch) => {
 
 //FIND PRODUCT BY ID
 export const findProductById = (reqData) => async (dispatch) => {
-  dispatch(findPrdouctByIdRequest);
+  dispatch(findPrdouctByIdRequest());
   const { productId } = reqData;
   try {
     const { data } = await api.get(`/api/products/${productId}`);
     dispatch(findPrdouctByIdSuccess(data));
+    console.log(data);
   } catch (error) {
     dispatch(findPrdouctByIdFailure(error));
   }
@@ -98,7 +114,7 @@ export const findProductById = (reqData) => async (dispatch) => {
 
 //FIND ALL PRODUCTS BY CATEGORY
 export const findProductsByCategory = (reqData) => async (dispatch) => {
-  dispatch(findProductsByCategoryRequest);
+  dispatch(findProductsByCategoryRequest());
   const {
     colors,
     sizes,
@@ -122,9 +138,32 @@ export const findProductsByCategory = (reqData) => async (dispatch) => {
   }
 };
 
+//CREATE product
+export const createProduct = (product) => async (dispatch) => {
+  dispatch(createProductRequest());
+  //creating form data
+  const formData = new FormData();
+  //setting images
+  product.images.forEach((image) => {
+    formData.append("images", image);
+  });
+  //setting product details
+  formData.append("productDetails", JSON.stringify(product.data));
+
+  try {
+    const { data } = await api.post("/api/products", formData);
+    dispatch(createProductSuccess(data));
+    toast.success("Product created successfully");
+    console.log("Product created", data);
+  } catch (error) {
+    dispatch(createProductFailure(error));
+    toast.success("Error while creating Product");
+  }
+};
+
 //Delete Product
 export const deleteProduct = (pId) => async (dispatch) => {
-  dispatch(deleteProductRequest);
+  dispatch(deleteProductRequest());
   try {
     const { data } = await api.delete(`/api/products/${pId}`);
     console.log(data);

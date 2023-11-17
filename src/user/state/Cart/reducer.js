@@ -3,6 +3,9 @@ import {
   ADD_ITEM_TO_CART_REQUEST,
   ADD_ITEM_TO_CART_SUCCESS,
   GET_CART_FAILURE,
+  GET_CART_ITEMS_COUNT_FAILURE,
+  GET_CART_ITEMS_COUNT_REQUEST,
+  GET_CART_ITEMS_COUNT_SUCCESS,
   GET_CART_REQUEST,
   GET_CART_SUCCESS,
   REMOVE_CART_ITEM_FAILURE,
@@ -17,6 +20,7 @@ const initialState = {
   cart: null,
   isLoading: true,
   error: null,
+  cartCount: null,
   cartItems: [],
 };
 
@@ -26,6 +30,7 @@ export const cartReducer = (state = initialState, action) => {
     case ADD_ITEM_TO_CART_REQUEST:
       return { ...state, isLoading: true, error: null };
     case ADD_ITEM_TO_CART_SUCCESS:
+      console.log("state", state);
       return {
         ...state,
         isLoading: false,
@@ -53,6 +58,18 @@ export const cartReducer = (state = initialState, action) => {
     case GET_CART_FAILURE:
       return { ...state, isLoading: false, error: action.payload };
 
+    //get cart item count
+    case GET_CART_ITEMS_COUNT_REQUEST:
+      return { ...state, isLoading: true, error: null };
+    case GET_CART_ITEMS_COUNT_SUCCESS:
+      return {
+        ...state,
+        isLoading: false,
+        error: null,
+        cartCount: action.payload.count,
+      };
+    case GET_CART_ITEMS_COUNT_FAILURE:
+      return { ...state, isLoading: false, error: action.payload };
     //update cart item
     //remove cart item
     case UPDATE_CART_ITEM_REQUEST:
@@ -64,7 +81,7 @@ export const cartReducer = (state = initialState, action) => {
         .sort((a, b) => -(a.cartItemId - b.cartItemId));
       return {
         ...state,
-        laoding: false,
+        isLoading: false,
         error: null,
         cart: action.payload,
         cartItems: sortedCartItems,

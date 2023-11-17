@@ -36,7 +36,7 @@ const getUserDataFailure = (error) => ({
 
 //methods
 export const register = (userData) => async (dispatch) => {
-  dispatch(registerRequest);
+  dispatch(registerRequest());
   try {
     const response = await axios.post(`${API_BASE_URL}/auth/signup`, userData);
     const user = response.data;
@@ -50,7 +50,7 @@ export const register = (userData) => async (dispatch) => {
 };
 
 export const login = (loginData) => async (dispatch) => {
-  dispatch(loginRequest);
+  dispatch(loginRequest());
   try {
     const response = await axios.post(`${API_BASE_URL}/auth/signin`, loginData);
     const user = response.data;
@@ -65,7 +65,7 @@ export const login = (loginData) => async (dispatch) => {
 };
 
 export const getUser = (jwtToken) => async (dispatch) => {
-  dispatch(getUserDataRequest);
+  dispatch(getUserDataRequest());
   try {
     const response = await axios.get(`${API_BASE_URL}/api/users/profile`, {
       headers: {
