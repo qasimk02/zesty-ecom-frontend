@@ -1,2 +1,2 @@
 # zesty-ecom-frontend
-  <img src="readme-assets/zestyHomepae.PNG" alt="demo">
+  <img src="readme-assets/zestyHomepage.PNG" alt="demo">
